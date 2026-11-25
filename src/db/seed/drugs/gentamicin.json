@@ -1,0 +1,115 @@
+{
+	"adjustments": [
+		{
+			"action": "Prolong dosing interval",
+			"condition": "Coadministration with ibuprofen or indomethacin"
+		},
+		{
+			"action": "Prolong dosing interval",
+			"condition": "Birth depression or cyanotic CHD"
+		}
+	],
+	"administration": "IV infusion over 30-120 min",
+	"cautions": [
+		"Separate infusion from penicillin-containing compounds (ampicillin)",
+		"Use preservative-free formulation only in neonates"
+	],
+	"class": "aminoglycoside",
+	"concentrations": ["2 mg/ml", "10 mg/ml"],
+	"dilution": {
+		"finalConcMgPerMl": 10,
+		"instruction": "Gentamicin 80mg/2ml: 1 ml + 3 ml SWFI/D5W/NS/D10W. Gentamicin 20mg/2ml: ready to use."
+	},
+	"dosing": {
+		"axes": ["PMA_weeks", "PNA_days"],
+		"doseUnit": "mg/kg/dose",
+		"table": [
+			{
+				"dosePerKg": 5,
+				"intervalHours": 48,
+				"note": "Also for significant asphyxia, PDA, or indomethacin",
+				"pmaWeeks": {
+					"max": 29,
+					"maxInclusive": true,
+					"min": 0
+				},
+				"pnaDays": {
+					"max": 7,
+					"min": 0
+				}
+			},
+			{
+				"dosePerKg": 4,
+				"intervalHours": 36,
+				"pmaWeeks": {
+					"max": 29,
+					"maxInclusive": true,
+					"min": 0
+				},
+				"pnaDays": {
+					"max": 28,
+					"min": 8
+				}
+			},
+			{
+				"dosePerKg": 4,
+				"intervalHours": 24,
+				"pmaWeeks": {
+					"max": 29,
+					"maxInclusive": true,
+					"min": 0
+				},
+				"pnaDays": {
+					"max": 999,
+					"min": 29
+				}
+			},
+			{
+				"dosePerKg": 4.5,
+				"intervalHours": 36,
+				"pmaWeeks": {
+					"max": 34,
+					"maxInclusive": true,
+					"min": 30
+				},
+				"pnaDays": {
+					"max": 7,
+					"min": 0
+				}
+			},
+			{
+				"dosePerKg": 4,
+				"intervalHours": 24,
+				"pmaWeeks": {
+					"max": 34,
+					"maxInclusive": true,
+					"min": 30
+				},
+				"pnaDays": {
+					"max": 999,
+					"min": 8
+				}
+			},
+			{
+				"dosePerKg": 4,
+				"intervalHours": 24,
+				"pmaWeeks": {
+					"max": 99,
+					"maxInclusive": true,
+					"min": 35
+				},
+				"pnaDays": {
+					"max": 999,
+					"min": 0
+				}
+			}
+		],
+		"type": "matrix"
+	},
+	"id": "gentamicin",
+	"lastUpdated": "2019-06-14",
+	"monitoring": ["Serum peak/trough levels", "Renal function", "Hearing"],
+	"name": "Gentamicin",
+	"references": ["Micromedex Neofax", "Lexicomp"],
+	"routes": ["IV", "IM"]
+}

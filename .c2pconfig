@@ -1,0 +1,52 @@
+# Default output & formatting
+default_output = "clipboard"    # Options: stdout, clipboard, file
+output_format = "markdown"      # Options: markdown, json, xml
+line_numbers = true             # Helps pinpoint exact lines during code reviews
+encoding = "cl100k"             # Supported by code2prompt: cl100k, p50k, p50k_edit, r50k_bas
+
+# Source files to include
+include_patterns = [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.css",
+    "drizzle/**/*.ts",
+    "drizzle/**/*.sql",
+    "package.json",
+    "tsconfig.json",
+    "biome.json",
+    "vite.config.*"
+]
+
+# Exclude dependencies, build artifacts, lockfiles, generated files, and heavy assets/data
+exclude_patterns = [
+    "**/node_modules/**",
+    "**/.output/**",
+    "**/.nitro/**",
+    "**/.tanstack/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.git/**",
+    "**/coverage/**",
+    "bun.lock",
+    "bun.lockb",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "**/routeTree.gen.ts",
+    "**/seed/**",
+    "**/fixtures/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/*.min.*",
+    "**/*.map",
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.jpeg",
+    "**/*.webp",
+    "**/*.svg",
+    "**/*.ico",
+    "**/*.woff2",
+    "**/*.pdf",
+    "**/*.csv",
+    "**/*.json"
+]

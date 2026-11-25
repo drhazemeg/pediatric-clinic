@@ -1,0 +1,57 @@
+{
+	"id": "phenobarbital",
+	"name": "Phenobarbital",
+	"aliases": ["sominaletta"],
+	"class": "anticonvulsant",
+	"routes": ["IV", "IM", "Oral"],
+	"concentrations": ["40 mg/ml (IV)", "15 mg/5 ml (oral)"],
+	"dosing": [
+		{
+			"type": "simple",
+			"indication": "Anticonvulsant (loading)",
+			"dosePerKg": 17.5,
+			"doseUnit": "mg/kg/dose",
+			"intervalHours": 0
+		},
+		{
+			"type": "simple",
+			"indication": "Anticonvulsant (maintenance)",
+			"dosePerKg": 4,
+			"doseUnit": "mg/kg/day",
+			"intervalHours": 24
+		},
+		{
+			"type": "simple",
+			"indication": "Neonatal abstinence syndrome (loading)",
+			"dosePerKg": 16,
+			"doseUnit": "mg/kg/dose",
+			"intervalHours": 0
+		},
+		{
+			"type": "simple",
+			"indication": "Neonatal abstinence syndrome (maintenance)",
+			"dosePerKg": 2.5,
+			"doseUnit": "mg/kg/dose",
+			"intervalHours": 12
+		}
+	],
+	"dilution": {
+		"instruction": "IV: 1 ml (40 mg/ml) + 3 ml NS → 10 mg/ml. Oral: ready for use.",
+		"finalConcMgPerMl": 10
+	},
+	"administration": "IV over 15-30 min. Max rate 1-3 mg/kg/min. Flush IV with saline before and after.",
+	"maxDose": { "value": 40, "unit": "mg/kg", "per": "dose" },
+	"cautions": [
+		"IM route not acceptable",
+		"Infusion must be completed within 4 hours of preparation"
+	],
+	"monitoring": [
+		"Respiratory depression",
+		"Heart rate",
+		"Blood pressure",
+		"Serum levels"
+	],
+	"adjustments": [],
+	"references": ["Micromedex Neofax", "Lexicomp"],
+	"lastUpdated": "2019-06-29"
+}

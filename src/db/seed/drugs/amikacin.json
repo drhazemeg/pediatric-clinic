@@ -1,0 +1,161 @@
+{
+	"id": "amikacin",
+	"name": "Amikacin",
+	"class": "aminoglycoside",
+	"routes": ["IV", "IM"],
+	"concentrations": ["5 mg/ml", "2.5-10 mg/ml"],
+	"dosing": [
+		{
+			"type": "weightBand",
+			"indication": "General (PNA-weight dosing)",
+			"doseUnit": "mg/kg/dose",
+			"bands": [
+				{
+					"weightG": { "min": 0, "max": 800 },
+					"pnaDays": { "min": 0, "max": 13 },
+					"dosePerKg": 16,
+					"intervalHours": 48
+				},
+				{
+					"weightG": { "min": 0, "max": 800 },
+					"pnaDays": { "min": 14, "max": 999 },
+					"dosePerKg": 20,
+					"intervalHours": 42
+				},
+				{
+					"weightG": { "min": 801, "max": 1200 },
+					"pnaDays": { "min": 0, "max": 13 },
+					"dosePerKg": 16,
+					"intervalHours": 42
+				},
+				{
+					"weightG": { "min": 801, "max": 1200 },
+					"pnaDays": { "min": 14, "max": 999 },
+					"dosePerKg": 20,
+					"intervalHours": 36
+				},
+				{
+					"weightG": { "min": 1201, "max": 2000 },
+					"pnaDays": { "min": 0, "max": 13 },
+					"dosePerKg": 15,
+					"intervalHours": 36
+				},
+				{
+					"weightG": { "min": 1201, "max": 2000 },
+					"pnaDays": { "min": 14, "max": 999 },
+					"dosePerKg": 18,
+					"intervalHours": 30
+				},
+				{
+					"weightG": { "min": 2001, "max": 2800 },
+					"pnaDays": { "min": 0, "max": 13 },
+					"dosePerKg": 15,
+					"intervalHours": 36
+				},
+				{
+					"weightG": { "min": 2001, "max": 2800 },
+					"pnaDays": { "min": 14, "max": 999 },
+					"dosePerKg": 18,
+					"intervalHours": 24
+				},
+				{
+					"weightG": { "min": 2801, "max": 10000 },
+					"pnaDays": { "min": 0, "max": 13 },
+					"dosePerKg": 15,
+					"intervalHours": 30
+				},
+				{
+					"weightG": { "min": 2801, "max": 10000 },
+					"pnaDays": { "min": 14, "max": 999 },
+					"dosePerKg": 18,
+					"intervalHours": 20
+				}
+			]
+		},
+		{
+			"type": "matrix",
+			"indication": "General (PMA-PNA dosing)",
+			"axes": ["PMA_weeks", "PNA_days"],
+			"doseUnit": "mg/kg/dose",
+			"table": [
+				{
+					"pmaWeeks": { "min": 0, "max": 29, "maxInclusive": true },
+					"pnaDays": { "min": 0, "max": 7 },
+					"dosePerKg": 14,
+					"intervalHours": 48
+				},
+				{
+					"pmaWeeks": { "min": 0, "max": 29, "maxInclusive": true },
+					"pnaDays": { "min": 8, "max": 28 },
+					"dosePerKg": 12,
+					"intervalHours": 36
+				},
+				{
+					"pmaWeeks": { "min": 0, "max": 29, "maxInclusive": true },
+					"pnaDays": { "min": 29, "max": 999 },
+					"dosePerKg": 12,
+					"intervalHours": 24
+				},
+				{
+					"pmaWeeks": { "min": 30, "max": 34, "maxInclusive": true },
+					"pnaDays": { "min": 0, "max": 7 },
+					"dosePerKg": 12,
+					"intervalHours": 36
+				},
+				{
+					"pmaWeeks": { "min": 30, "max": 34, "maxInclusive": true },
+					"pnaDays": { "min": 8, "max": 999 },
+					"dosePerKg": 12,
+					"intervalHours": 24
+				},
+				{
+					"pmaWeeks": { "min": 35, "max": 99, "maxInclusive": true },
+					"pnaDays": { "min": 0, "max": 999 },
+					"dosePerKg": 12,
+					"intervalHours": 24
+				}
+			]
+		},
+		{
+			"type": "simple",
+			"indication": "Meningitis (PNA ≤7d & ≥2kg)",
+			"dosePerKg": 7.5,
+			"doseUnit": "mg/kg/dose",
+			"intervalHours": 12
+		},
+		{
+			"type": "simple",
+			"indication": "Meningitis (PNA >7d & ≥2kg)",
+			"dosePerKg": 10,
+			"doseUnit": "mg/kg/dose",
+			"intervalHours": 8
+		}
+	],
+	"dilution": {
+		"instruction": "Amikacin 100mg/2ml: 1 ml + 9 ml D5W/NS/D10W. Amikacin 500mg/2ml: 1 ml + 4 ml D5W/NS → then 1 ml + 9 ml diluent.",
+		"finalConcMgPerMl": 5,
+		"maxConcMgPerMl": 10
+	},
+	"administration": "IV infusion over 60-120 min. IM undiluted.",
+	"cautions": [
+		"Separate infusion from penicillin-containing compounds",
+		"Avoid concomitant use with potent diuretics (furosemide) - additive ototoxicity"
+	],
+	"monitoring": ["Serum peak/trough levels", "Renal function", "Hearing"],
+	"adjustments": [
+		{
+			"condition": "Coadministration with ibuprofen or indomethacin",
+			"action": "Prolong dosing interval by 10 hours"
+		},
+		{
+			"condition": "Therapeutic hypothermia for asphyxia",
+			"action": "Prolong dosing interval by 10 hours"
+		},
+		{
+			"condition": "Birth depression or cyanotic CHD",
+			"action": "Prolong dosing interval by 10 hours"
+		}
+	],
+	"references": ["Micromedex Neofax", "Lexicomp"],
+	"lastUpdated": "2020-03-20"
+}

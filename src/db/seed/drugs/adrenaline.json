@@ -1,0 +1,44 @@
+{
+	"id": "adrenaline",
+	"name": "Adrenaline (Epinephrine)",
+	"aliases": ["epinephrine", "adrenalin"],
+	"class": "vasopressor / resuscitation",
+	"routes": ["IV", "IO", "ET"],
+	"concentrations": ["1 mg/1 ml"],
+	"dosing": [
+		{
+			"type": "simple",
+			"indication": "CPR & severe bradycardia (IV/IO)",
+			"dosePerKg": 0.02,
+			"doseUnit": "mg/kg",
+			"intervalHours": 0.0667
+		},
+		{
+			"type": "continuousInfusion",
+			"indication": "Septic shock / hypotension",
+			"doseUnit": "mcg/kg/min",
+			"ratePerKgPerMin": {
+				"initial": 0.1,
+				"usualMin": 0.05,
+				"usualMax": 0.5,
+				"max": 2.6
+			}
+		}
+	],
+	"dilution": {
+		"instruction": "IV infusion: 0.5 ml Adrenaline (1 mg/ml) + 50 ml D5W → 10 mcg/ml. Central line preferred.",
+		"finalConcMgPerMl": 0.01,
+		"maxConcMgPerMl": 0.1,
+		"stability": "Use immediately after preparation"
+	},
+	"administration": "IV push over 1 min. ET: follow with several positive-pressure ventilations.",
+	"maxDose": { "value": 1, "unit": "mg", "per": "dose" },
+	"cautions": [
+		"Do NOT administer sodium bicarbonate or any alkaline solution through IV line containing adrenaline",
+		"Observe IV site for signs of infiltration"
+	],
+	"monitoring": ["Heart rate", "Blood pressure", "IV site"],
+	"adjustments": [],
+	"references": ["Micromedex Neofax", "Lexicomp"],
+	"lastUpdated": "2019-04-25"
+}

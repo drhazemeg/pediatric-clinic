@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@import 'tw-animate-css';
+@import "shadcn/tailwind.css";
+
+/* ─── Stylesheets ───────────────────────────────────────────────────── */
+@import "./styles/theme.css";
+@import "./styles/fonts.css";
+@import "./styles/types.css";
+@import "./styles/prose.css";
+@import "./styles/base.css";
+@import "./styles/components.css";
+@import "./styles/animations.css";
+@import "./styles/utilities.css";
+@import "./styles/scrollbar.css";
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant light (&:is(.light *));
+
+/* ─── Plugin registration ───────────────────────────────────────────── */
+/* @plugin "@tailwindcss/typography"; */
+
+/* ─── Source scanning — rely on tree-shaking instead of fragile globs ─ */
+@source "../**/*.{ts,tsx}";
+
+@source not "../node_modules";
+@source not "../.nitro";
+@source not "../.output";
+@source not "../dist";
+
+/* ── Custom utilities ─────────────────────────────────────────────────── */
+
+@utility animate-pulse-slow {
+	animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@utility cn-input-otp {
+	display: flex;
+	align-items: center;
+}
+
+/* ── soft-foreground: maps to muted-foreground ───────────────────────── */
+@theme inline {
+	--color-soft-foreground: var(--muted-foreground);
+}

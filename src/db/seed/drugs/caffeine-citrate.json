@@ -1,0 +1,40 @@
+{
+	"id": "caffeine-citrate",
+	"name": "Caffeine citrate",
+	"class": "respiratory stimulant",
+	"routes": ["IV", "Oral"],
+	"concentrations": ["10 mg/ml", "20 mg/ml"],
+	"dosing": [
+		{
+			"type": "simple",
+			"indication": "Apnea of prematurity (loading)",
+			"dosePerKg": 20,
+			"doseUnit": "mg/kg/dose",
+			"intervalHours": 0
+		},
+		{
+			"type": "simple",
+			"indication": "Apnea of prematurity (maintenance)",
+			"dosePerKg": 7.5,
+			"doseUnit": "mg/kg/dose",
+			"intervalHours": 24
+		}
+	],
+	"dilution": {
+		"instruction": "Ready for use or may dilute to final conc 10 mg/ml.",
+		"finalConcMgPerMl": 10
+	},
+	"administration": "Loading: IV over 30 min. Maintenance: IV over 10 min or oral.",
+	"cautions": [
+		"Do NOT push IV doses of caffeine citrate",
+		"Hold dose if HR > 180 beats/min"
+	],
+	"monitoring": [
+		"Heart rate",
+		"Signs of necrotizing enterocolitis",
+		"Feeding tolerance"
+	],
+	"adjustments": [],
+	"references": ["Micromedex Neofax", "NHS 2017-2019", "Lexicomp"],
+	"lastUpdated": "2019-03-29"
+}
