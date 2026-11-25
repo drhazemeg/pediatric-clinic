@@ -1,60 +1,67 @@
 // apps/web/src/hooks/use-finance.ts
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
-import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useMemo } from 'react';
+import { toast } from 'sonner';
+
 import {
-	createLedgerEntryMutationOptions,
-	deleteLedgerEntryMutationOptions,
-	financeQueryKeys,
-	financeQueryOptions
-} from "@/lib/features/finances/query-options";
-import { getErrorMessage } from "@/lib/web/error-utils";
+  createLedgerEntryMutationOptions,
+  deleteLedgerEntryMutationOptions,
+  financeQueryKeys,
+  financeQueryOptions,
+} from '@/lib/features/finances/query-options';
+import { getErrorMessage } from '@/lib/web/error-utils';
 
 export interface LedgerDateRange {
-	from?: Date;
-	to?: Date;
+  from?: Date;
+  to?: Date;
 }
 
-export type LedgerKindFilter = "all" | "revenue" | "expense";
-export type DatePreset = "7d" | "30d" | "90d" | "ytd" | "all";
+export type LedgerKindFilter = 'all' | 'revenue' | 'expense';
+
+export type DatePreset = '7d' | '30d' | '90d' | 'ytd' | 'all';
 
 export interface ClinicLedgerEntry {
-	id: number;
-	clinicId: string;
-	kind: "revenue" | "expense";
-	category: string;
-	amountCents: number;
-	note?: string | null;
-	occurredAt: Date | string;
-	createdAt?: Date | string;
-	updatedAt?: Date | string;
+  id: number;
+  clinicId: string;
+  kind: 'revenue' | 'expense';
+  category: string;
+  amountCents: number;
+  note?: string | null;
+  occurredAt: Date | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
 export interface CreateLedgerEntryPayload {
-	clinicId: string;
-	kind: "expense" | "revenue";
-	category: string;
-	amountCents: number;
-	note?: string;
-	occurredAt?: Date;
+  clinicId: string;
+  kind: 'expense' | 'revenue';
+  category: string;
+  amountCents: number;
+  note?: string;
+  occurredAt?: Date;
 }
 
 export function getDateRangeFromPreset(preset: DatePreset): LedgerDateRange {
-	const now = new Date();
-	if (preset === "all") return {};
+  const now = new Date();
 
-	const from = new Date();
-	if (preset === "7d") {
-		from.setDate(now.getDate() - 7);
-	} else if (preset === "30d") {
-		from.setDate(now.getDate() - 30);
-	} else if (preset === "90d") {
-		from.setDate(now.getDate() - 90);
-	} else if (preset === "ytd") {
-		from.setMonth(0, 1);
-		from.setHours(0, 0, 0, 0);
-	}
-	return { from, to: now };
+  if (preset === 'all') {
+    return {};
+  }
+
+  const from = new Date();
+
+  if (preset === '7d') {
+    from.setDate(now.getDate() - 7);
+  } else if (preset === '30d') {
+    from.setDate(now.getDate() - 30);
+  } else if (preset === '90d') {
+    from.setDate(now.getDate() - 90);
+  } else {
+    from.setMonth(0, 1);
+    from.setHours(0, 0, 0, 0);
+  }
+
+  return { from, to: now };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -62,81 +69,87 @@ export function getDateRangeFromPreset(preset: DatePreset): LedgerDateRange {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useLedgerEntries(
-	clinicId: string | null | undefined,
-	range?: LedgerDateRange,
-	kind: LedgerKindFilter = "all",
-	category?: string,
-	search?: string
+  clinicId: string | null | undefined,
+  range?: LedgerDateRange,
+  kind: LedgerKindFilter = 'all',
+  category?: string,
+  search?: string,
 ) {
-	return useQuery({
-		...financeQueryOptions.entries({
-			clinicId: clinicId ?? "",
-			from: range?.from,
-			to: range?.to,
-			kind,
-			category: category && category !== "all" ? category : undefined,
-			search: search?.trim() ? search.trim() : undefined
-		}),
-		enabled: Boolean(clinicId)
-	});
+  return useQuery({
+    ...financeQueryOptions.entries({
+      clinicId: clinicId ?? '',
+      from: range?.from,
+      to: range?.to,
+      kind,
+      category:
+        category !== undefined && category !== '' && category !== 'all'
+          ? category
+          : undefined,
+      search:
+        search !== undefined && search.trim() !== ''
+          ? search.trim()
+          : undefined,
+    }),
+    enabled: clinicId !== undefined && clinicId !== null && clinicId !== '',
+  });
 }
 
 export function useLedgerSummary(
-	clinicId: string | null | undefined,
-	range?: LedgerDateRange
+  clinicId: string | null | undefined,
+  range?: LedgerDateRange,
 ) {
-	return useQuery({
-		...financeQueryOptions.summary({
-			clinicId: clinicId ?? "",
-			from: range?.from,
-			to: range?.to
-		}),
-		enabled: Boolean(clinicId)
-	});
+  return useQuery({
+    ...financeQueryOptions.summary({
+      clinicId: clinicId ?? '',
+      from: range?.from,
+      to: range?.to,
+    }),
+    enabled: Boolean(clinicId),
+  });
 }
 
 export function useLedgerChartData(
-	clinicId: string | null | undefined,
-	range?: LedgerDateRange
+  clinicId: string | null | undefined,
+  range?: LedgerDateRange,
 ) {
-	return useQuery({
-		...financeQueryOptions.chart({
-			clinicId: clinicId ?? "",
-			from: range?.from,
-			to: range?.to
-		}),
-		enabled: Boolean(clinicId)
-	});
+  return useQuery({
+    ...financeQueryOptions.chart({
+      clinicId: clinicId ?? '',
+      from: range?.from,
+      to: range?.to,
+    }),
+    enabled: Boolean(clinicId),
+  });
 }
 
 export function useLedgerCategoryBreakdown(
-	clinicId: string | null | undefined,
-	kind: "revenue" | "expense",
-	range?: LedgerDateRange
+  clinicId: string | null | undefined,
+  kind: 'revenue' | 'expense',
+  range?: LedgerDateRange,
 ) {
-	return useQuery({
-		...financeQueryOptions.categoryBreakdown({
-			clinicId: clinicId ?? "",
-			kind,
-			from: range?.from,
-			to: range?.to
-		}),
-		enabled: Boolean(clinicId)
-	});
+  return useQuery({
+    ...financeQueryOptions.categoryBreakdown({
+      clinicId: clinicId ?? '',
+      kind,
+      from: range?.from,
+      to: range?.to,
+    }),
+    enabled: Boolean(clinicId),
+  });
 }
 
 export function useFinanceAiInsight(
-	clinicId: string | null | undefined,
-	range?: LedgerDateRange
+  clinicId: string | null | undefined,
+  range?: LedgerDateRange,
 ) {
-	return useQuery({
-		...financeQueryOptions.insight({
-			clinicId: clinicId ?? "",
-			from: range?.from,
-			to: range?.to
-		}),
-		enabled: Boolean(clinicId)
-	});
+  return useQuery({
+    ...financeQueryOptions.insight({
+      clinicId: clinicId ?? '',
+      from: range?.from,
+      to: range?.to,
+    }),
+    enabled: Boolean(clinicId),
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -144,41 +157,41 @@ export function useFinanceAiInsight(
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useCreateLedgerEntry() {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		...createLedgerEntryMutationOptions(queryClient),
-		onSuccess: async (_data, variables) => {
-			await queryClient.invalidateQueries({
-				queryKey: financeQueryKeys.clinic(variables.clinicId)
-			});
-			toast.success(
-				variables.kind === "revenue"
-					? "Revenue recorded ✓"
-					: "Expense recorded ✓"
-			);
-		},
-		onError: err => {
-			toast.error(getErrorMessage(err) || "Failed to save ledger entry");
-		}
-	});
+  return useMutation({
+    ...createLedgerEntryMutationOptions(queryClient),
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: financeQueryKeys.clinic(variables.clinicId),
+      });
+      toast.success(
+        variables.kind === 'revenue'
+          ? 'Revenue recorded ✓'
+          : 'Expense recorded ✓',
+      );
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err) || 'Failed to save ledger entry');
+    },
+  });
 }
 
 export function useDeleteLedgerEntry(_clinicId: string) {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		...deleteLedgerEntryMutationOptions(queryClient),
-		onSuccess: async (_data, variables) => {
-			await queryClient.invalidateQueries({
-				queryKey: financeQueryKeys.clinic(variables.clinicId)
-			});
-			toast.success("Entry deleted");
-		},
-		onError: err => {
-			toast.error(getErrorMessage(err) || "Failed to delete entry");
-		}
-	});
+  return useMutation({
+    ...deleteLedgerEntryMutationOptions(queryClient),
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: financeQueryKeys.clinic(variables.clinicId),
+      });
+      toast.success('Entry deleted');
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err) || 'Failed to delete entry');
+    },
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -186,76 +199,83 @@ export function useDeleteLedgerEntry(_clinicId: string) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useClinicFinance(
-	clinicId: string | null | undefined,
-	range?: LedgerDateRange
+  clinicId: string | null | undefined,
+  range?: LedgerDateRange,
 ) {
-	const entriesQuery = useLedgerEntries(clinicId, range);
-	const summaryQuery = useLedgerSummary(clinicId, range);
-	const chartQuery = useLedgerChartData(clinicId, range);
-	const revBreakdownQuery = useLedgerCategoryBreakdown(
-		clinicId,
-		"revenue",
-		range
-	);
-	const expBreakdownQuery = useLedgerCategoryBreakdown(
-		clinicId,
-		"expense",
-		range
-	);
-	const aiInsightQuery = useFinanceAiInsight(clinicId, range);
-	const createEntryMutation = useCreateLedgerEntry();
+  const entriesQuery = useLedgerEntries(clinicId, range);
+  const summaryQuery = useLedgerSummary(clinicId, range);
+  const chartQuery = useLedgerChartData(clinicId, range);
 
-	const createEntry = useCallback(
-		async (
-			input: Omit<CreateLedgerEntryPayload, "clinicId"> & { clinicId?: string }
-		) => {
-			const target = input.clinicId ?? clinicId;
-			if (!target) throw new Error("No active clinic selected");
-			return createEntryMutation.mutateAsync({
-				...input,
-				clinicId: target,
-				occurredAt: input.occurredAt ?? new Date()
-			});
-		},
-		[clinicId, createEntryMutation]
-	);
+  const revBreakdownQuery = useLedgerCategoryBreakdown(
+    clinicId,
+    'revenue',
+    range,
+  );
 
-	return useMemo(
-		() => ({
-			entries: entriesQuery.data ?? [],
-			summary: summaryQuery.data ?? null,
-			chartPoints: chartQuery.data ?? [],
-			revBreakdown: revBreakdownQuery.data ?? [],
-			expBreakdown: expBreakdownQuery.data ?? [],
-			aiInsight: aiInsightQuery.data ?? null,
-			entriesQuery,
-			summaryQuery,
-			chartQuery,
-			aiInsightQuery,
-			createEntry,
-			createEntryMutation,
-			isCreating: createEntryMutation.isPending,
-			isLoading:
-				entriesQuery.isLoading ||
-				summaryQuery.isLoading ||
-				chartQuery.isLoading,
-			isFetching:
-				entriesQuery.isFetching ||
-				summaryQuery.isFetching ||
-				chartQuery.isFetching,
-			error: entriesQuery.error ?? summaryQuery.error ?? null
-		}),
-		[
-			entriesQuery,
-			summaryQuery,
-			chartQuery,
-			revBreakdownQuery,
-			expBreakdownQuery,
-			aiInsightQuery,
-			createEntry,
-			createEntryMutation
-		]
-	);
+  const expBreakdownQuery = useLedgerCategoryBreakdown(
+    clinicId,
+    'expense',
+    range,
+  );
+
+  const aiInsightQuery = useFinanceAiInsight(clinicId, range);
+  const createEntryMutation = useCreateLedgerEntry();
+
+  const createEntry = useCallback(
+    async (
+      input: Omit<CreateLedgerEntryPayload, 'clinicId'> & { clinicId?: string },
+    ) => {
+      const target = input.clinicId ?? clinicId;
+
+      if (target === undefined || target === null || target === '') {
+        throw new Error('No active clinic selected');
+      }
+
+      return await createEntryMutation.mutateAsync({
+        ...input,
+        clinicId: target,
+        occurredAt: input.occurredAt ?? new Date(),
+      });
+    },
+    [clinicId, createEntryMutation],
+  );
+
+  return useMemo(
+    () => ({
+      entries: entriesQuery.data ?? [],
+      summary: summaryQuery.data ?? null,
+      chartPoints: chartQuery.data ?? [],
+      revBreakdown: revBreakdownQuery.data ?? [],
+      expBreakdown: expBreakdownQuery.data ?? [],
+      aiInsight: aiInsightQuery.data ?? null,
+      entriesQuery,
+      summaryQuery,
+      chartQuery,
+      aiInsightQuery,
+      createEntry,
+      createEntryMutation,
+      isCreating: createEntryMutation.isPending,
+      isLoading:
+        entriesQuery.isLoading ||
+        summaryQuery.isLoading ||
+        chartQuery.isLoading,
+      isFetching:
+        entriesQuery.isFetching ||
+        summaryQuery.isFetching ||
+        chartQuery.isFetching,
+      error: entriesQuery.error ?? summaryQuery.error ?? null,
+    }),
+    [
+      entriesQuery,
+      summaryQuery,
+      chartQuery,
+      revBreakdownQuery,
+      expBreakdownQuery,
+      aiInsightQuery,
+      createEntry,
+      createEntryMutation,
+    ],
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -263,18 +283,18 @@ export function useClinicFinance(
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function formatLedgerAmount(
-	amountCents: number,
-	currency = "EGP",
-	locale = "en-EG"
+  amountCents: number,
+  currency = 'EGP',
+  locale = 'en-EG',
 ): string {
-	return new Intl.NumberFormat(locale, {
-		style: "currency",
-		currency,
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2
-	}).format(amountCents / 100);
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amountCents / 100);
 }
 
 export function formatEgp(cents: number | null | undefined): string {
-	return formatLedgerAmount(cents ?? 0);
+  return formatLedgerAmount(cents ?? 0);
 }

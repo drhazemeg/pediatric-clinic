@@ -1,24 +1,26 @@
-import { existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import dotenv from "dotenv";
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 
-const serverEnvPath = resolve(
-	dirname(fileURLToPath(import.meta.url)),
-	"../../.env.local"
-);
+import dotenv from 'dotenv';
+
+const serverEnvPath = path.resolve(import.meta.dirname, '../../.env.local');
 
 export function loadDatabaseUrl(): string {
-	if (!process.env.DATABASE_URL && existsSync(serverEnvPath)) {
-		dotenv.config({ path: serverEnvPath });
-	}
+  if (
+    (process.env.DATABASE_URL === undefined ||
+      process.env.DATABASE_URL === '') &&
+    existsSync(serverEnvPath)
+  ) {
+    dotenv.config({ path: serverEnvPath });
+  }
 
-	const databaseUrl = process.env.DATABASE_URL;
-	if (!databaseUrl) {
-		throw new Error(
-			"DATABASE_URL is not set. Add it to Coolify environment variables (or apps/server/.env for local dev)."
-		);
-	}
+  const databaseUrl = process.env.DATABASE_URL;
 
-	return databaseUrl;
+  if (databaseUrl === undefined || databaseUrl === '') {
+    throw new Error(
+      'DATABASE_URL is not set. Add it to Coolify environment variables (or apps/server/.env for local dev).',
+    );
+  }
+
+  return databaseUrl;
 }

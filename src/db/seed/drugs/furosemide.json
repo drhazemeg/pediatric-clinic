@@ -1,46 +1,46 @@
 {
-	"id": "furosemide",
-	"name": "Furosemide",
-	"aliases": ["lasix"],
-	"class": "loop diuretic",
-	"routes": ["IV", "IM"],
-	"concentrations": ["10 mg/ml"],
-	"dosing": {
-		"type": "matrix",
-		"axes": ["PMA_weeks"],
-		"doseUnit": "mg/kg/dose",
-		"table": [
-			{
-				"pmaWeeks": { "min": 0, "max": 29, "maxInclusive": true },
-				"dosePerKg": 1,
-				"intervalHours": 24,
-				"note": "Max 2 mg/kg/dose"
-			},
-			{
-				"pmaWeeks": { "min": 30, "max": 99, "maxInclusive": true },
-				"dosePerKg": 1,
-				"intervalHours": 12,
-				"note": "Max 2 mg/kg/dose; every 6-8h if > 1 month old"
-			}
-		]
-	},
-	"dilution": {
-		"instruction": "Ready for use, or dilute to 2 mg/ml for infusion.",
-		"finalConcMgPerMl": 10
-	},
-	"administration": "IV over 15-30 min",
-	"maxDose": { "value": 2, "unit": "mg/kg", "per": "dose" },
-	"cautions": [
-		"Contraindicated in anuria",
-		"Consider alternate-day therapy for long-term use"
-	],
-	"monitoring": [
-		"Daily weight",
-		"Urine output",
-		"Serum electrolytes (K+, Na+, Cl-)",
-		"Serum phosphate"
-	],
-	"adjustments": [],
-	"references": ["Micromedex Neofax", "Lexicomp"],
-	"lastUpdated": "2019-06-21"
+  "id": "furosemide",
+  "name": "Furosemide",
+  "aliases": ["lasix"],
+  "class": "loop diuretic",
+  "routes": ["IV", "IM"],
+  "concentrations": ["10 mg/ml"],
+  "dosing": {
+    "type": "matrix",
+    "axes": ["PMA_weeks"],
+    "doseUnit": "mg/kg/dose",
+    "table": [
+      {
+        "pmaWeeks": { "min": 0, "max": 29, "maxInclusive": true },
+        "dosePerKg": 1,
+        "intervalHours": 24,
+        "note": "Max 2 mg/kg/dose"
+      },
+      {
+        "pmaWeeks": { "min": 30, "max": 99, "maxInclusive": true },
+        "dosePerKg": 1,
+        "intervalHours": 12,
+        "note": "Max 2 mg/kg/dose; every 6-8h if > 1 month old"
+      }
+    ]
+  },
+  "dilution": {
+    "instruction": "Ready for use, or dilute to 2 mg/ml for infusion.",
+    "finalConcMgPerMl": 10
+  },
+  "administration": "IV over 15-30 min",
+  "maxDose": { "value": 2, "unit": "mg/kg", "per": "dose" },
+  "cautions": [
+    "Contraindicated in anuria",
+    "Consider alternate-day therapy for long-term use"
+  ],
+  "monitoring": [
+    "Daily weight",
+    "Urine output",
+    "Serum electrolytes (K+, Na+, Cl-)",
+    "Serum phosphate"
+  ],
+  "adjustments": [],
+  "references": ["Micromedex Neofax", "Lexicomp"],
+  "lastUpdated": "2019-06-21"
 }

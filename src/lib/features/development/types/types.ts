@@ -1,55 +1,61 @@
 export interface IndicatorSeriesRow {
-	id: string;
-	value: number;
-	zScore: number | null;
-	percentile: number | null;
-	classification: string | null;
-	lmsL: number | null;
-	lmsM: number | null;
-	lmsS: number | null;
-	/** Length in cm at the same visit; only set for weight-for-length. */
-	lengthCm: number | null;
-	visit: {
-		visitedAt: Date;
-		ageMonths: number;
-	} | null;
+  id: string;
+  value: number;
+  zScore: number | null;
+  percentile: number | null;
+  classification: string | null;
+  lmsL: number | null;
+  lmsM: number | null;
+  lmsS: number | null;
+  /** Length in cm at the same visit; only set for weight-for-length. */
+  lengthCm: number | null;
+  visit: {
+    visitedAt: Date;
+    ageMonths: number;
+  } | null;
 }
 
 export const INDICATOR_AXIS: Record<Indicator, XAxis> = {
-	"weight-for-age": "age",
-	"length-for-age": "age",
-	"weight-for-length": "age",
-	"bmi-for-age": "age",
-	"head-circumference-for-age": "age"
+  'weight-for-age': 'age',
+  'length-for-age': 'age',
+  'weight-for-length': 'age',
+  'bmi-for-age': 'age',
+  'head-circumference-for-age': 'age',
 };
-export const INDICATOR_LABELS: Record<string, { label: string; unit: string }> =
-	{
-		"weight-for-age": { label: "Weight-for-age", unit: "kg" },
-		"length-for-age": { label: "Length / Height-for-age", unit: "cm" },
-		"head-circumference-for-age": {
-			label: "Head circumference-for-age",
-			unit: "cm"
-		},
-		"bmi-for-age": { label: "BMI-for-age", unit: "kg/m²" }
-	};
+
+export const INDICATOR_LABELS = {
+  'weight-for-age': { label: 'Weight-for-age', unit: 'kg' },
+  'length-for-age': { label: 'Length / Height-for-age', unit: 'cm' },
+  'head-circumference-for-age': {
+    label: 'Head circumference-for-age',
+    unit: 'cm',
+  },
+  'bmi-for-age': { label: 'BMI-for-age', unit: 'kg/m²' },
+} as const satisfies Record<string, { label: string; unit: string }>;
 // ─────────────────────────────────────────────────────────────────────────────
 // Core unions
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type Indicator =
-	| "weight-for-age"
-	| "length-for-age"
-	| "weight-for-length"
-	| "bmi-for-age"
-	| "head-circumference-for-age";
+  | 'weight-for-age'
+  | 'length-for-age'
+  | 'weight-for-length'
+  | 'bmi-for-age'
+  | 'head-circumference-for-age';
 
 export type GrowthIndicator = Indicator;
-export type Sex = "male" | "female";
-export type XAxis = "age" | "length";
-export type Gender = "boy" | "girl";
-export type GrowthMetric = "wfa" | "lhfa" | "wfl" | "bmifa";
-export type ClinicalSeverity = "normal" | "warning" | "alert";
-export type TimeframeOption = "0-2" | "0-5" | "5-10" | "0-19" | "all";
+
+export type Sex = 'male' | 'female';
+
+export type XAxis = 'age' | 'length';
+
+export type Gender = 'boy' | 'girl';
+
+export type GrowthMetric = 'wfa' | 'lhfa' | 'wfl' | 'bmifa';
+
+export type ClinicalSeverity = 'normal' | 'warning' | 'alert';
+
+export type TimeframeOption = '0-2' | '0-5' | '5-10' | '0-19' | 'all';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Chart shapes
@@ -57,33 +63,33 @@ export type TimeframeOption = "0-2" | "0-5" | "5-10" | "0-19" | "all";
 
 /** The seven canonical reference values at one x (the median + 6 SD bands). */
 export interface ChartPointValues {
-	median: number;
-	sd3neg: number;
-	sd2neg: number;
-	sd1neg: number;
-	sd1: number;
-	sd2: number;
-	sd3: number;
+  median: number;
+  sd3neg: number;
+  sd2neg: number;
+  sd1neg: number;
+  sd1: number;
+  sd2: number;
+  sd3: number;
 }
 
 export interface ChartPoint extends ChartPointValues {
-	x: number;
+  x: number;
 }
 
 export type ChartBand = ChartPoint;
 
 export interface ChartCurves {
-	indicator: Indicator;
-	sex: Sex;
-	xAxis: XAxis;
-	points: ChartPoint[];
+  indicator: Indicator;
+  sex: Sex;
+  xAxis: XAxis;
+  points: Array<ChartPoint>;
 }
 
 /** Inclusive domain for the requested chart. */
 export interface ChartRange {
-	xAxis: XAxis;
-	min: number;
-	max: number;
+  xAxis: XAxis;
+  min: number;
+  max: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,42 +103,42 @@ export interface ChartRange {
  * Order matches the WHO Anthro export: age/length, L, M, S, P3, P50, P97.
  */
 export type RawCheck = readonly [
-	xValue: number,
-	l: number,
-	m: number,
-	s: number,
-	p3: number,
-	p50: number,
-	p97: number
+  xValue: number,
+  l: number,
+  m: number,
+  s: number,
+  p3: number,
+  p50: number,
+  p97: number,
 ];
 
 export interface LmsRow {
-	indicator: Indicator;
-	sex: Sex;
-	xAxis: XAxis;
-	xValue: number;
-	l: number;
-	m: number;
-	s: number;
-	/** Present on rows produced by the parser; absent on hand-authored seeds. */
-	rawCheck?: RawCheck;
-	page?: number;
-	yMonths?: string;
+  indicator: Indicator;
+  sex: Sex;
+  xAxis: XAxis;
+  xValue: number;
+  l: number;
+  m: number;
+  s: number;
+  /** Present on rows produced by the parser; absent on hand-authored seeds. */
+  rawCheck?: RawCheck;
+  page?: number;
+  yMonths?: string;
 }
 
 export interface ParsedLine {
-	xValue: number;
-	l: number;
-	m: number;
-	s: number;
-	rawCheck: [number, number, number, number, number, number, number];
+  xValue: number;
+  l: number;
+  m: number;
+  s: number;
+  rawCheck: [number, number, number, number, number, number, number];
 }
 
 /** The three LMS parameters alone — the only input the math needs. */
 export interface LmsTriple {
-	l: number;
-	m: number;
-	s: number;
+  l: number;
+  m: number;
+  s: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,14 +151,40 @@ export interface LmsTriple {
  * is designed to be `console.error`'d whole so the failure is debuggable
  * without a stack trace.
  */
-export class LmsDomainError extends Error {
-	readonly context: Record<string, unknown>;
+export interface LmsDomainErrorContext {
+  readonly indicator?: Indicator;
+  readonly xAxis?: XAxis;
+  readonly sex?: Sex;
+  readonly z?: number;
+  readonly value?: number;
+  readonly l?: number;
+  readonly m?: number;
+  readonly s?: number;
+  readonly base?: number;
+  readonly targetX?: number;
+  readonly lowerX?: number;
+  readonly upperX?: number;
+  readonly index?: number;
+  readonly range?: {
+    readonly xAxis: XAxis;
+    readonly min: number;
+    readonly max: number;
+  };
+  readonly bounds?: {
+    readonly min: number;
+    readonly max: number;
+  };
+  readonly cause?: Error;
+}
 
-	constructor(message: string, context: Record<string, unknown> = {}) {
-		super(message);
-		this.name = "LmsDomainError";
-		this.context = context;
-	}
+export class LmsDomainError extends Error {
+  readonly context: LmsDomainErrorContext;
+
+  constructor(message: string, context: LmsDomainErrorContext = {}) {
+    super(message);
+    this.name = 'LmsDomainError';
+    this.context = context;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -160,113 +192,113 @@ export class LmsDomainError extends Error {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** WHO severity, used for clinical highlighting (null = within normal range). */
-export type Severity = "severe" | "moderate" | "mild" | null;
+export type Severity = 'severe' | 'moderate' | 'mild' | null;
 
 export type ClassificationCategory =
-	| "normal"
-	| "underweight"
-	| "overweight"
-	| "obese"
-	| "stunted"
-	| "wasted"
-	| "thin"
-	| "microcephaly"
-	| "macrocephaly";
+  | 'normal'
+  | 'underweight'
+  | 'overweight'
+  | 'obese'
+  | 'stunted'
+  | 'wasted'
+  | 'thin'
+  | 'microcephaly'
+  | 'macrocephaly';
 
 export interface Classification {
-	category: ClassificationCategory;
-	severity: Severity;
-	label: string;
+  category: ClassificationCategory;
+  severity: Severity;
+  label: string;
 }
 
 /** Result bundle from the query layer, kept for the chart tooltips. */
 export interface BasicZScoreResult {
-	zScore: number;
-	percentile: number;
-	classification: Classification;
+  zScore: number;
+  percentile: number;
+  classification: Classification;
 }
 
 export interface GrowthStandard {
-	day: number;
-	l: number;
-	m: number;
-	s: number;
-	sd4neg: number;
-	sd3neg: number;
-	sd2neg: number;
-	sd1neg: number;
-	sd0: number;
-	sd1: number;
-	sd2: number;
-	sd3: number;
-	sd4: number;
+  day: number;
+  l: number;
+  m: number;
+  s: number;
+  sd4neg: number;
+  sd3neg: number;
+  sd2neg: number;
+  sd1neg: number;
+  sd0: number;
+  sd1: number;
+  sd2: number;
+  sd3: number;
+  sd4: number;
 }
 
 export interface ChildMeasurement {
-	day: number;
-	value: number;
+  day: number;
+  value: number;
 }
 
 export interface GrowthMeasurementRow {
-	id: string;
-	value: number;
-	zScore?: number | null;
-	percentile?: number | null;
-	classification?: string | null;
-	visit?: {
-		visitedAt?: string | Date | null;
-		ageMonths?: number | null;
-	} | null;
+  id: string;
+  value: number;
+  zScore?: number | null;
+  percentile?: number | null;
+  classification?: string | null;
+  visit?: {
+    visitedAt?: string | Date | null;
+    ageMonths?: number | null;
+  } | null;
 }
 
 export type ClinicalClassification =
-	| "Severe Underweight (< -3 SD)"
-	| "Moderate Underweight (-3 to -2 SD)"
-	| "Normal Weight (-2 to +2 SD)"
-	| "High Weight (> +2 SD)"
-	| "Obesity (> +3 SD)"
-	| "Severe Stunting (< -3 SD)"
-	| "Moderate Stunting (-3 to -2 SD)"
-	| "Normal Stature (-2 to +2 SD)"
-	| "Tall Stature (> +2 SD)"
-	| "Severe Wasting (< -3 SD)"
-	| "Moderate Wasting (-3 to -2 SD)"
-	| "Normal Weight-for-Height (-2 to +1 SD)"
-	| "Risk of Overweight (+1 to +2 SD)"
-	| "Overweight (+2 to +3 SD)"
-	| "Severe Thinness (< -3 SD)"
-	| "Thinness (-3 to -2 SD)"
-	| "Normal BMI (-2 to +1 SD)"
-	| "BMI At Risk of Overweight (+1 to +2 SD)"
-	| "BMI Obesity (+2 to +3 SD)"
-	| "BMI Severe Obesity (> +3 SD)"
-	| "Out of Reference Range";
+  | 'Severe Underweight (< -3 SD)'
+  | 'Moderate Underweight (-3 to -2 SD)'
+  | 'Normal Weight (-2 to +2 SD)'
+  | 'High Weight (> +2 SD)'
+  | 'Obesity (> +3 SD)'
+  | 'Severe Stunting (< -3 SD)'
+  | 'Moderate Stunting (-3 to -2 SD)'
+  | 'Normal Stature (-2 to +2 SD)'
+  | 'Tall Stature (> +2 SD)'
+  | 'Severe Wasting (< -3 SD)'
+  | 'Moderate Wasting (-3 to -2 SD)'
+  | 'Normal Weight-for-Height (-2 to +1 SD)'
+  | 'Risk of Overweight (+1 to +2 SD)'
+  | 'Overweight (+2 to +3 SD)'
+  | 'Severe Thinness (< -3 SD)'
+  | 'Thinness (-3 to -2 SD)'
+  | 'Normal BMI (-2 to +1 SD)'
+  | 'BMI At Risk of Overweight (+1 to +2 SD)'
+  | 'BMI Obesity (+2 to +3 SD)'
+  | 'BMI Severe Obesity (> +3 SD)'
+  | 'Out of Reference Range';
 
 export interface ZScoreResult {
-	zScore: number;
-	percentile: number;
-	percentileBeyond: "<0.01%" | ">99.99%" | null;
-	metric: GrowthMetric;
-	measuredValue: number;
-	xValue: number;
-	clamped: boolean;
-	l: number;
-	m: number;
-	s: number;
-	sUnit: "sd" | "cv";
-	classification: ClinicalClassification;
-	severity: ClinicalSeverity;
+  zScore: number;
+  percentile: number;
+  percentileBeyond: '<0.01%' | '>99.99%' | null;
+  metric: GrowthMetric;
+  measuredValue: number;
+  xValue: number;
+  clamped: boolean;
+  l: number;
+  m: number;
+  s: number;
+  sUnit: 'sd' | 'cv';
+  classification: ClinicalClassification;
+  severity: ClinicalSeverity;
 }
 
 export interface PatientGrowthSummary {
-	patient: { id: string; gender: Gender; dob: string; name: string };
-	measurements: Array<{ date: string; ageMonths: number }>;
-	latestMeasurement?: { date: string; ageMonths: number };
-	latestZScores?: {
-		wfa?: ZScoreResult;
-		lhfa?: ZScoreResult;
-		wfl?: ZScoreResult;
-		bmifa?: ZScoreResult;
-		hcfa?: ZScoreResult;
-	};
+  patient: { id: string; gender: Gender; dob: string; name: string };
+  measurements: Array<{ date: string; ageMonths: number }>;
+  latestMeasurement?: { date: string; ageMonths: number };
+  latestZScores?: {
+    wfa?: ZScoreResult;
+    lhfa?: ZScoreResult;
+    wfl?: ZScoreResult;
+    bmifa?: ZScoreResult;
+    hcfa?: ZScoreResult;
+  };
 }

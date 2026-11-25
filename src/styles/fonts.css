@@ -1,48 +1,48 @@
 @font-face {
-	font-family: "Alyamama";
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-	src: url("/fonts/alyamama-regular.woff2") format("woff2");
+  font-family: 'Alyamama';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/alyamama-regular.woff2') format('woff2');
 }
 
 @font-face {
-	font-family: "Fraunces";
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-	src: url("/fonts/fraunces-regular.woff2") format("woff2");
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/fraunces-regular.woff2') format('woff2');
 }
 
 @font-face {
-	font-family: "Caveat";
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-	src: url("/fonts/caveat-regular.woff2") format("woff2");
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/caveat-regular.woff2') format('woff2');
 }
 
 @font-face {
-	font-family: "Geist Mono";
-	font-style: normal;
-	font-weight: 100 900;
-	font-display: swap;
-	src:
-		url("/fonts/geist-mono-latin-wght-normal.woff2") format("woff2"),
-		url("/fonts/geist-mono-regular.woff2") format("woff2");
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src:
+    url('/fonts/geist-mono-latin-wght-normal.woff2') format('woff2'),
+    url('/fonts/geist-mono-regular.woff2') format('woff2');
 }
 
 .material-symbols-outlined {
-	font-family: "Material Symbols Outlined", sans-serif;
-	font-style: normal;
-	font-weight: 400;
-	-webkit-font-feature-settings: "liga";
-	font-feature-settings: "liga";
-	-webkit-font-smoothing: antialiased;
-	line-height: 1;
-	text-transform: none;
-	letter-spacing: normal;
-	word-wrap: normal;
-	white-space: nowrap;
-	direction: ltr;
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
 }

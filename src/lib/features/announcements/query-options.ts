@@ -1,11 +1,12 @@
-import { queryOptions } from "@tanstack/react-query";
-import { getActiveAnnouncementFn } from "@/server/functions/announcements.functions";
+import { queryOptions } from '@tanstack/react-query';
+
+import { getActiveAnnouncementFn } from '@/server/functions/announcements.functions';
 
 export const announcementQueryOptions = {
-	active: () =>
-		queryOptions({
-			queryKey: ["announcements", "active"] as const,
-			queryFn: () => getActiveAnnouncementFn(),
-			staleTime: 60_000
-		})
+  active: () =>
+    queryOptions({
+      queryKey: ['announcements', 'active'] as const,
+      queryFn: async () => await getActiveAnnouncementFn(),
+      staleTime: 60_000,
+    }),
 };

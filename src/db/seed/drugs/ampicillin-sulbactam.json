@@ -1,40 +1,40 @@
 {
-	"id": "ampicillin-sulbactam",
-	"name": "Ampicillin-sulbactam",
-	"aliases": ["ultracillin", "unasyn"],
-	"class": "penicillin antibiotic",
-	"routes": ["IV", "IM"],
-	"concentrations": ["375 mg/ml", "45 mg/ml"],
-	"dosing": {
-		"type": "matrix",
-		"axes": ["GA_weeks"],
-		"doseUnit": "mg/kg/day",
-		"table": [
-			{
-				"gaWeeks": { "min": 0, "max": 36, "maxInclusive": true },
-				"dosePerKg": 150,
-				"intervalHours": 12,
-				"note": "Premature neonate"
-			},
-			{
-				"gaWeeks": { "min": 37, "max": 99, "maxInclusive": true },
-				"dosePerKg": 150,
-				"intervalHours": 8,
-				"note": "Full-term neonate"
-			}
-		]
-	},
-	"dilution": {
-		"instruction": "IV: Reconstitute with SWFI, further dilute with D5W or NS to final conc ≤ 45 mg/ml. Use within several hours.",
-		"finalConcMgPerMl": 37.5,
-		"maxConcMgPerMl": 45
-	},
-	"administration": "IV over 10-15 min slow push, or intermittent infusion over 15-30 min",
-	"cautions": [
-		"Prolonged use may cause overgrowth of non-susceptible organisms"
-	],
-	"monitoring": ["Renal function", "Signs of superinfection"],
-	"adjustments": [],
-	"references": ["Hospital formulary"],
-	"lastUpdated": "2019"
+  "id": "ampicillin-sulbactam",
+  "name": "Ampicillin-sulbactam",
+  "aliases": ["ultracillin", "unasyn"],
+  "class": "penicillin antibiotic",
+  "routes": ["IV", "IM"],
+  "concentrations": ["375 mg/ml", "45 mg/ml"],
+  "dosing": {
+    "type": "matrix",
+    "axes": ["GA_weeks"],
+    "doseUnit": "mg/kg/day",
+    "table": [
+      {
+        "gaWeeks": { "min": 0, "max": 36, "maxInclusive": true },
+        "dosePerKg": 150,
+        "intervalHours": 12,
+        "note": "Premature neonate"
+      },
+      {
+        "gaWeeks": { "min": 37, "max": 99, "maxInclusive": true },
+        "dosePerKg": 150,
+        "intervalHours": 8,
+        "note": "Full-term neonate"
+      }
+    ]
+  },
+  "dilution": {
+    "instruction": "IV: Reconstitute with SWFI, further dilute with D5W or NS to final conc ≤ 45 mg/ml. Use within several hours.",
+    "finalConcMgPerMl": 37.5,
+    "maxConcMgPerMl": 45
+  },
+  "administration": "IV over 10-15 min slow push, or intermittent infusion over 15-30 min",
+  "cautions": [
+    "Prolonged use may cause overgrowth of non-susceptible organisms"
+  ],
+  "monitoring": ["Renal function", "Signs of superinfection"],
+  "adjustments": [],
+  "references": ["Hospital formulary"],
+  "lastUpdated": "2019"
 }

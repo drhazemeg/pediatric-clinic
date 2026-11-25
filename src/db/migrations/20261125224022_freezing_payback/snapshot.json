@@ -1,0 +1,47 @@
+{
+  "type": "diff",
+  "version": "10",
+  "dialect": "postgres",
+  "id": "a9b39bf5-db21-47fa-862d-03c5d4ef0072",
+  "prevIds": [
+    "e5b22a42-51cc-4fa3-b282-31ed95d74484"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "patients",
+        "blood_type"
+      ],
+      "writes": [
+        "s|col|public.patients.blood_type",
+        "n|col|public.patients.blood_type",
+        "e|col|public.patients.blood_type"
+      ],
+      "reads": [
+        "n|tbl|public.patients",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "patients",
+        "name": "blood_type",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}

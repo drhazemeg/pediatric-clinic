@@ -1,93 +1,112 @@
 // src/db/seed/index.ts
 
-import { sql as drizzleSql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { DEVELOPMENTAL_MILESTONES } from "@/lib/features/development/dev-types";
-import { LMS_SEED, type Sex } from "@/lib/features/development/index";
-import { ROUTINE_CHILDHOOD_SCHEDULE } from "@/lib/features/immunizations";
-import { closeDb } from ".";
-import { loadDatabaseUrl } from "./database-url";
-import { LMS_VERSION } from "./queries/measurements.queries";
-import * as schema from "./schema";
-import { CLINIC_HURGHADA_ID } from "./seed/seed-config";
-import { seedFormulary } from "./seed/seed-formulary";
-import { seedWhoGrowthStandards } from "./seed/seed-who";
-import type { MeasurementIndicator } from "./validations";
+import type { MeasurementIndicator } from './validations';
+import type { Sex } from '@/lib/features/development/index';
+
+import { sql as drizzleSql } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/node-postgres';
+
+import { DEVELOPMENTAL_MILESTONES } from '@/lib/features/development/dev-types';
+import { LMS_SEED } from '@/lib/features/development/index';
+import { ROUTINE_CHILDHOOD_SCHEDULE } from '@/lib/features/immunizations';
+
+import { closeDb } from '.';
+import { loadDatabaseUrl } from './database-url';
+import { LMS_VERSION } from './queries/measurements.queries';
+import * as schema from './schema';
+import { CLINIC_HURGHADA_ID } from './seed/seed-config';
+import { seedFormulary } from './seed/seed-formulary';
+import { seedWhoGrowthStandards } from './seed/seed-who';
 
 const db = drizzle(loadDatabaseUrl());
 
 /** PostgreSQL supports up to 65,535 bind parameters; 250 rows/batch stays well below that. */
 const PG_BATCH_CHUNK_SIZE = 250;
 
+/* oxlint-disable eslint/no-bitwise, unicorn/prefer-math-trunc, eslint/operator-assignment -- Deterministic PRNG and UUID hash rely on 32-bit bitwise operations */
 /** Deterministic UUID-ish ID derived from a seed string (stable across runs). */
-function stableId(seed: string): string {
-	let h1 = 0xdeadbeef ^ seed.length;
-	let h2 = 0x41c6ce57 ^ seed.length;
-	for (let i = 0; i < seed.length; i++) {
-		const ch = seed.charCodeAt(i);
-		h1 = Math.imul(h1 ^ ch, 2654435761);
-		h2 = Math.imul(h2 ^ ch, 1597334677);
-	}
-	h1 =
-		Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^
-		Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-	h2 =
-		Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^
-		Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-	let h3 = Math.imul(h1 ^ 0x9e3779b9, 2654435761);
-	let h4 = Math.imul(h2 ^ 0x85ebca6b, 1597334677);
-	h3 = Math.imul(h3 ^ (h3 >>> 16), 2246822507);
-	h4 = Math.imul(h4 ^ (h4 >>> 16), 2246822507);
-	const hi = (h2 >>> 0).toString(16).padStart(8, "0");
-	const lo = (h1 >>> 0).toString(16).padStart(8, "0");
-	const hi2 = (h4 >>> 0).toString(16).padStart(8, "0");
-	const lo2 = (h3 >>> 0).toString(16).padStart(8, "0");
-	const raw = (hi + lo + hi2 + lo2).split("");
-	raw[12] = "4";
-	raw[16] = ((Number.parseInt(raw[16] ?? "0", 16) & 0x3) | 0x8).toString(16);
-	const s = raw.join("");
-	return `${s.slice(0, 8)}-${s.slice(8, 12)}-${s.slice(12, 16)}-${s.slice(16, 20)}-${s.slice(20, 32)}`;
-}
+const stableId = (seed: string): string => {
+  let h1 = 0xde_ad_be_ef ^ seed.length;
+  let h2 = 0x41_c6_ce_57 ^ seed.length;
+
+  for (let i = 0; i < seed.length; i += 1) {
+    const ch = seed.codePointAt(i) ?? 0;
+    h1 = Math.imul(h1 ^ ch, 2_654_435_761);
+    h2 = Math.imul(h2 ^ ch, 1_597_334_677);
+  }
+
+  h1 =
+    Math.imul(h1 ^ (h1 >>> 16), 2_246_822_507) ^
+    Math.imul(h2 ^ (h2 >>> 13), 3_266_489_909);
+  h2 =
+    Math.imul(h2 ^ (h2 >>> 16), 2_246_822_507) ^
+    Math.imul(h1 ^ (h1 >>> 13), 3_266_489_909);
+  let h3 = Math.imul(h1 ^ 0x9e_37_79_b9, 2_654_435_761);
+  let h4 = Math.imul(h2 ^ 0x85_eb_ca_6b, 1_597_334_677);
+  h3 = Math.imul(h3 ^ (h3 >>> 16), 2_246_822_507);
+  h4 = Math.imul(h4 ^ (h4 >>> 16), 2_246_822_507);
+  const hi = (h2 >>> 0).toString(16).padStart(8, '0');
+  const lo = (h1 >>> 0).toString(16).padStart(8, '0');
+  const hi2 = (h4 >>> 0).toString(16).padStart(8, '0');
+  const lo2 = (h3 >>> 0).toString(16).padStart(8, '0');
+  const raw = (hi + lo + hi2 + lo2).split('');
+  raw[12] = '4';
+  raw[16] = ((Number.parseInt(raw[16] ?? '0', 16) & 0x3) | 0x8).toString(16);
+  const s = raw.join('');
+
+  return `${s.slice(0, 8)}-${s.slice(8, 12)}-${s.slice(12, 16)}-${s.slice(16, 20)}-${s.slice(20, 32)}`;
+};
 
 /** Chunk an array into groups of `size`. */
-function chunk<T>(arr: readonly T[], size: number): T[][] {
-	const out: T[][] = [];
-	for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-	return out;
-}
+const chunk = <T>(arr: ReadonlyArray<T>, size: number): Array<Array<T>> => {
+  const out: Array<Array<T>> = [];
+
+  for (let i = 0; i < arr.length; i += size) {
+    out.push(arr.slice(i, i + size));
+  }
+
+  return out;
+};
 
 /** Insert rows in sequential PostgreSQL batches to keep queries compact and readable. */
-async function insertInChunks<T>(
-	rows: readonly T[],
-	insert: (part: T[]) => Promise<unknown>,
-	size = PG_BATCH_CHUNK_SIZE
-): Promise<void> {
-	for (const part of chunk(rows, size)) {
-		// eslint-disable-next-line no-await-in-loop
-		await insert(part);
-	}
-}
+const insertInChunks = async <T>(
+  rows: ReadonlyArray<T>,
+  insert: (part: Array<T>) => Promise<void>,
+  size = PG_BATCH_CHUNK_SIZE,
+): Promise<void> => {
+  for (const part of chunk(rows, size)) {
+    // oxlint-disable-next-line eslint/no-await-in-loop -- Sequential PostgreSQL batch inserts
+    await insert(part);
+  }
+};
 
 /** Small deterministic PRNG so re-runs produce identical patient data. */
-function mulberry32(seed: number) {
-	let a = seed >>> 0;
-	return () => {
-		a |= 0;
-		a = (a + 0x6d2b79f5) | 0;
-		let t = Math.imul(a ^ (a >>> 15), 1 | a);
-		t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-	};
-}
+const mulberry32 = (seed: number) => {
+  let a = seed >>> 0;
 
-const rand = mulberry32(20210501);
-const pick = <T>(arr: readonly T[]): T => {
-	const item = arr[Math.floor(rand() * arr.length)];
-	if (item === undefined) {
-		throw new Error("Cannot pick an item from an empty array");
-	}
-	return item;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d_2b_79_f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+
+    return ((t ^ (t >>> 14)) >>> 0) / 4_294_967_296;
+  };
 };
+/* oxlint-enable eslint/no-bitwise, unicorn/prefer-math-trunc, eslint/operator-assignment */
+
+const rand = mulberry32(20_210_501);
+
+const pick = <T>(arr: ReadonlyArray<T>): T => {
+  const item = arr[Math.floor(rand() * arr.length)];
+
+  if (item === undefined) {
+    throw new Error('Cannot pick an item from an empty array');
+  }
+
+  return item;
+};
+
 const randBetween = (min: number, max: number) => min + rand() * (max - min);
 const round = (n: number, d = 2) => Math.round(n * 10 ** d) / 10 ** d;
 
@@ -96,99 +115,171 @@ const round = (n: number, d = 2) => Math.round(n * 10 ** d) / 10 ** d;
 // ---------------------------------------------------------------------------
 
 /** ISO date string YYYY-MM-DD. */
-function isoDate(y: number, m: number, d: number): string {
-	const dt = new Date(Date.UTC(y, m - 1, d));
-	return dt.toISOString().slice(0, 10);
-}
+const isoDate = (y: number, m: number, d: number): string => {
+  const dt = new Date(Date.UTC(y, m - 1, d));
+
+  return dt.toISOString().slice(0, 10);
+};
 
 /** Add months to a YYYY-MM-DD date, preserving day-of-month (clamped). */
-function addMonths(iso: string, months: number): string {
-	const [y, m, d] = iso.split("-").map(Number);
-	if (y === undefined || m === undefined || d === undefined) {
-		throw new Error(`Invalid ISO date: ${iso}`);
-	}
-	const dt = new Date(Date.UTC(y, m - 1 + months, d));
-	return dt.toISOString().slice(0, 10);
-}
+const addMonths = (iso: string, months: number): string => {
+  const parts = iso.split('-').map(Number);
+  const y = parts.at(0);
+  const m = parts.at(1);
+  const d = parts.at(2);
+
+  if (y === undefined || m === undefined || d === undefined) {
+    throw new Error(`Invalid ISO date: ${iso}`);
+  }
+
+  const dt = new Date(Date.UTC(y, m - 1 + months, d));
+
+  return dt.toISOString().slice(0, 10);
+};
 
 /** Age in fractional months between DOB and visit date. */
-function ageMonths(dob: string, visitedAt: string): number {
-	const [dy, dm, dd] = dob.split("-").map(Number);
-	const [vy, vm, vd] = visitedAt.slice(0, 10).split("-").map(Number);
-	if (
-		dy === undefined ||
-		dm === undefined ||
-		dd === undefined ||
-		vy === undefined ||
-		vm === undefined ||
-		vd === undefined
-	) {
-		throw new Error(`Invalid date range: ${dob} to ${visitedAt}`);
-	}
-	const dobD = Date.UTC(dy, dm - 1, dd);
-	const visD = Date.UTC(vy, vm - 1, vd);
-	const days = (visD - dobD) / 86_400_000;
-	return round(days / 30.4375, 2);
-}
+const ageMonths = (dob: string, visitedAt: string): number => {
+  const dobParts = dob.split('-').map(Number);
+  const visParts = visitedAt.slice(0, 10).split('-').map(Number);
+  const dy = dobParts.at(0);
+  const dm = dobParts.at(1);
+  const dd = dobParts.at(2);
+  const vy = visParts.at(0);
+  const vm = visParts.at(1);
+  const vd = visParts.at(2);
+
+  if (
+    dy === undefined ||
+    dm === undefined ||
+    dd === undefined ||
+    vy === undefined ||
+    vm === undefined ||
+    vd === undefined
+  ) {
+    throw new Error(`Invalid date range: ${dob} to ${visitedAt}`);
+  }
+
+  const dobD = Date.UTC(dy, dm - 1, dd);
+  const visD = Date.UTC(vy, vm - 1, vd);
+  const days = (visD - dobD) / 86_400_000;
+
+  return round(days / 30.4375, 2);
+};
 
 // ---------------------------------------------------------------------------
 // Stats helpers
 // ---------------------------------------------------------------------------
 
 /** Normal CDF (Abramowitz & Stegun 7.1.26). */
-function normalCdf(z: number): number {
-	const t = 1 / (1 + 0.2316419 * Math.abs(z));
-	const d = 0.3989423 * Math.exp((-z * z) / 2);
-	let p =
-		d *
-		t *
-		(0.3193815 +
-			t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
-	if (z > 0) p = 1 - p;
-	return p;
-}
+const normalCdf = (z: number): number => {
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989423 * Math.exp((-z * z) / 2);
+
+  let p =
+    d *
+    t *
+    (0.3193815 +
+      t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+
+  if (z > 0) {
+    p = 1 - p;
+  }
+
+  return p;
+};
 
 /** Clamp a gaussian-ish draw to ±3. */
-function clampGaussian(z: number): number {
-	if (z > 3) return 3;
-	if (z < -3) return -3;
-	return z;
-}
+const clampGaussian = (z: number): number => {
+  if (z > 3) {
+    return 3;
+  }
+
+  if (z < -3) {
+    return -3;
+  }
+
+  return z;
+};
 
 /** Compute an approximate z-score from LMS for a given value (for display). */
-function zFromLms(value: number, l: number, m: number, s: number): number {
-	if (Math.abs(l) < 1e-9) return Math.log(value / m) / s;
-	return ((value / m) ** l - 1) / (l * s);
-}
+const zFromLms = (value: number, l: number, m: number, s: number): number => {
+  if (Math.abs(l) < 1e-9) {
+    return Math.log(value / m) / s;
+  }
 
-function classify(
-	indicator: MeasurementIndicator | "head-circumference-for-age",
-	z: number | null
-): string | null {
-	if (z === null) return null;
-	if (indicator === "weight-for-age") {
-		if (z < -3) return "Severely underweight";
-		if (z < -2) return "Underweight";
-		if (z > 3) return "Severely overweight";
-		if (z > 2) return "Overweight";
-		return "Normal weight";
-	}
-	if (indicator === "length-for-age") {
-		if (z < -3) return "Severely stunted";
-		if (z < -2) return "Stunted";
-		if (z > 2) return "Tall";
-		return "Normal length";
-	}
-	if (indicator === "bmi-for-age") {
-		if (z < -3) return "Severely wasted";
-		if (z < -2) return "Wasted";
-		if (z > 3) return "Severely obese";
-		if (z > 2) return "Obese";
-		if (z > 1) return "Overweight risk";
-		return "Normal BMI";
-	}
-	return null;
-}
+  return ((value / m) ** l - 1) / (l * s);
+};
+
+const classify = (
+  indicator: MeasurementIndicator | 'head-circumference-for-age',
+  z: number | null,
+): string | null => {
+  if (z === null) {
+    return null;
+  }
+
+  if (indicator === 'weight-for-age') {
+    if (z < -3) {
+      return 'Severely underweight';
+    }
+
+    if (z < -2) {
+      return 'Underweight';
+    }
+
+    if (z > 3) {
+      return 'Severely overweight';
+    }
+
+    if (z > 2) {
+      return 'Overweight';
+    }
+
+    return 'Normal weight';
+  }
+
+  if (indicator === 'length-for-age') {
+    if (z < -3) {
+      return 'Severely stunted';
+    }
+
+    if (z < -2) {
+      return 'Stunted';
+    }
+
+    if (z > 2) {
+      return 'Tall';
+    }
+
+    return 'Normal length';
+  }
+
+  if (indicator === 'bmi-for-age') {
+    if (z < -3) {
+      return 'Severely wasted';
+    }
+
+    if (z < -2) {
+      return 'Wasted';
+    }
+
+    if (z > 3) {
+      return 'Severely obese';
+    }
+
+    if (z > 2) {
+      return 'Obese';
+    }
+
+    if (z > 1) {
+      return 'Overweight risk';
+    }
+
+    return 'Normal BMI';
+  }
+
+  return null;
+};
 
 const sqlCount = () => drizzleSql<number>`count(*)::int`;
 
@@ -197,866 +288,964 @@ const sqlCount = () => drizzleSql<number>`count(*)::int`;
 // ---------------------------------------------------------------------------
 
 const CLINICS = [
-	{ id: "clinic-cairo-01", name: "Cairo Children's Clinic" },
-	{ id: "clinic-alex-01", name: "Alexandria Pediatric Center" },
-	{ id: "clinic-giza-01", name: "Giza Family Health Unit" },
-	{
-		id: CLINIC_HURGHADA_ID,
-		name: "Hurghada General Hospital — Pediatric Clinic"
-	}
+  { id: 'clinic-cairo-01', name: "Cairo Children's Clinic" },
+  { id: 'clinic-alex-01', name: 'Alexandria Pediatric Center' },
+  { id: 'clinic-giza-01', name: 'Giza Family Health Unit' },
+  {
+    id: CLINIC_HURGHADA_ID,
+    name: 'Hurghada General Hospital — Pediatric Clinic',
+  },
 ] as const;
 
 const EGYPTIAN_FIRST_M = [
-	"Ahmed",
-	"Mohamed",
-	"Youssef",
-	"Karim",
-	"Omar",
-	"Ali",
-	"Hassan",
-	"Tarek",
-	"Mahmoud",
-	"Ziad",
-	"Adham",
-	"Hazem",
-	"Mostafa",
-	"Ibrahim",
-	"Khaled"
+  'Ahmed',
+  'Mohamed',
+  'Youssef',
+  'Karim',
+  'Omar',
+  'Ali',
+  'Hassan',
+  'Tarek',
+  'Mahmoud',
+  'Ziad',
+  'Adham',
+  'Hazem',
+  'Mostafa',
+  'Ibrahim',
+  'Khaled',
 ];
 
 const EGYPTIAN_FIRST_F = [
-	"Fatma",
-	"Aya",
-	"Mona",
-	"Salma",
-	"Nour",
-	"Hana",
-	"Yasmin",
-	"Mariam",
-	"Dina",
-	"Layla",
-	"Sara",
-	"Amina",
-	"Farida",
-	"Rana",
-	"Hager"
+  'Fatma',
+  'Aya',
+  'Mona',
+  'Salma',
+  'Nour',
+  'Hana',
+  'Yasmin',
+  'Mariam',
+  'Dina',
+  'Layla',
+  'Sara',
+  'Amina',
+  'Farida',
+  'Rana',
+  'Hager',
 ];
 
 const EGYPTIAN_LAST = [
-	"Hassan",
-	"Ibrahim",
-	"El-Sayed",
-	"Abdelrahman",
-	"Mostafa",
-	"Fahmy",
-	"Shokry",
-	"Nassar",
-	"Farouk",
-	"Zaki",
-	"El-Masry",
-	"Gaber",
-	"Othman"
+  'Hassan',
+  'Ibrahim',
+  'El-Sayed',
+  'Abdelrahman',
+  'Mostafa',
+  'Fahmy',
+  'Shokry',
+  'Nassar',
+  'Farouk',
+  'Zaki',
+  'El-Masry',
+  'Gaber',
+  'Othman',
 ];
 
 const ICD_POOL = [
-	{ code: "J06.9", desc: "Acute upper respiratory infection, unspecified" },
-	{ code: "J20.9", desc: "Acute bronchitis, unspecified" },
-	{ code: "A09", desc: "Infectious gastroenteritis and colitis, unspecified" },
-	{ code: "R50.9", desc: "Fever, unspecified" },
-	{ code: "H66.9", desc: "Otitis media, unspecified" },
-	{ code: "L20.9", desc: "Atopic dermatitis, unspecified" },
-	{ code: "R63.4", desc: "Abnormal weight loss" },
-	{ code: "E44.0", desc: "Moderate protein-calorie malnutrition" },
-	{ code: "Z00.1", desc: "Encounter for routine child health exam" },
-	{ code: "J45.909", desc: "Unspecified asthma, uncomplicated" }
+  { code: 'J06.9', desc: 'Acute upper respiratory infection, unspecified' },
+  { code: 'J20.9', desc: 'Acute bronchitis, unspecified' },
+  { code: 'A09', desc: 'Infectious gastroenteritis and colitis, unspecified' },
+  { code: 'R50.9', desc: 'Fever, unspecified' },
+  { code: 'H66.9', desc: 'Otitis media, unspecified' },
+  { code: 'L20.9', desc: 'Atopic dermatitis, unspecified' },
+  { code: 'R63.4', desc: 'Abnormal weight loss' },
+  { code: 'E44.0', desc: 'Moderate protein-calorie malnutrition' },
+  { code: 'Z00.1', desc: 'Encounter for routine child health exam' },
+  { code: 'J45.909', desc: 'Unspecified asthma, uncomplicated' },
 ] as const;
 
 const DRUG_POOL = [
-	{ name: "Paracetamol", dose: "120mg/5ml", freq: "every 6h PRN", days: 3 },
-	{ name: "Amoxicillin", dose: "250mg/5ml", freq: "TID", days: 7 },
-	{ name: "Ibuprofen", dose: "100mg/5ml", freq: "TID", days: 3 },
-	{ name: "Cetirizine", dose: "2.5mg/5ml", freq: "OD at night", days: 5 },
-	{ name: "Salbutamol", dose: "2.5mg neb", freq: "QID PRN", days: 5 },
-	{ name: "ORS sachets", dose: "1 sachet", freq: "after each stool", days: 3 },
-	{ name: "Vitamin D3", dose: "400 IU", freq: "OD", days: 30 },
-	{ name: "Zinc sulfate", dose: "20mg", freq: "OD", days: 14 }
+  { name: 'Paracetamol', dose: '120mg/5ml', freq: 'every 6h PRN', days: 3 },
+  { name: 'Amoxicillin', dose: '250mg/5ml', freq: 'TID', days: 7 },
+  { name: 'Ibuprofen', dose: '100mg/5ml', freq: 'TID', days: 3 },
+  { name: 'Cetirizine', dose: '2.5mg/5ml', freq: 'OD at night', days: 5 },
+  { name: 'Salbutamol', dose: '2.5mg neb', freq: 'QID PRN', days: 5 },
+  { name: 'ORS sachets', dose: '1 sachet', freq: 'after each stool', days: 3 },
+  { name: 'Vitamin D3', dose: '400 IU', freq: 'OD', days: 30 },
+  { name: 'Zinc sulfate', dose: '20mg', freq: 'OD', days: 14 },
 ] as const;
 
 const NOTE_TEMPLATES = [
-	{
-		title: "Parental concern — feeding",
-		body: "Mother reports reduced feeding for 2 days. No vomiting. Advised to monitor wet diapers."
-	},
-	{
-		title: "Growth follow-up",
-		body: "Weight trending along −1 SD. Re-check in 4 weeks; consider dietary recall."
-	},
-	{
-		title: "Immunization status",
-		body: "Up to date per national schedule. Next DTP due in 6 weeks."
-	},
-	{
-		title: "Allergy review",
-		body: "Mild eczema flare after introducing cow's milk. Advised to delay reintroduction by 3 months."
-	},
-	{
-		title: "Developmental milestone check",
-		body: "Walks independently, says 5+ words. Age-appropriate."
-	}
+  {
+    title: 'Parental concern — feeding',
+    body: 'Mother reports reduced feeding for 2 days. No vomiting. Advised to monitor wet diapers.',
+  },
+  {
+    title: 'Growth follow-up',
+    body: 'Weight trending along −1 SD. Re-check in 4 weeks; consider dietary recall.',
+  },
+  {
+    title: 'Immunization status',
+    body: 'Up to date per national schedule. Next DTP due in 6 weeks.',
+  },
+  {
+    title: 'Allergy review',
+    body: "Mild eczema flare after introducing cow's milk. Advised to delay reintroduction by 3 months.",
+  },
+  {
+    title: 'Developmental milestone check',
+    body: 'Walks independently, says 5+ words. Age-appropriate.',
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
 // LMS references
 // ---------------------------------------------------------------------------
 
-async function seedLms() {
-	console.log(`\n📐 Seeding LMS references (version=${LMS_VERSION})…`);
+const seedLms = async () => {
+  console.log(`\n📐 Seeding LMS references (version=${LMS_VERSION})…`);
 
-	const rows = LMS_SEED.map(r => {
-		const [sd3neg, sd2neg, sd1neg, sd0, sd1, sd2, sd3] = r.rawCheck;
-		return {
-			indicator: r.indicator,
-			sex: r.sex,
-			xAxis: r.xAxis,
-			xValue: r.xValue,
-			l: r.l,
-			m: r.m,
-			s: r.s,
-			sd3neg,
-			sd2neg,
-			sd1neg,
-			sd0,
-			sd1,
-			sd2,
-			sd3,
-			version: LMS_VERSION
-		};
-	}) satisfies (typeof schema.lmsReferences.$inferInsert)[];
+  const rows = LMS_SEED.map((r) => {
+    const [sd3neg, sd2neg, sd1neg, sd0, sd1, sd2, sd3] = r.rawCheck;
 
-	let inserted = 0;
-	await insertInChunks(rows, async part => {
-		const res = await db
-			.insert(schema.lmsReferences)
-			.values(part)
-			.onConflictDoNothing()
-			.returning({ x: schema.lmsReferences.xValue });
-		inserted += res.length;
-	});
+    return {
+      indicator: r.indicator,
+      sex: r.sex,
+      xAxis: r.xAxis,
+      xValue: r.xValue,
+      l: r.l,
+      m: r.m,
+      s: r.s,
+      sd3neg,
+      sd2neg,
+      sd1neg,
+      sd0,
+      sd1,
+      sd2,
+      sd3,
+      version: LMS_VERSION,
+    };
+  }) satisfies Array<typeof schema.lmsReferences.$inferInsert>;
 
-	const [count] = await db
-		.select({ count: sqlCount() })
-		.from(schema.lmsReferences);
+  let inserted = 0;
+  await insertInChunks(rows, async (part) => {
+    const res = await db
+      .insert(schema.lmsReferences)
+      .values(part)
+      .onConflictDoNothing()
+      .returning({ x: schema.lmsReferences.xValue });
 
-	console.log(
-		`   ✔ ${rows.length} rows processed, ${inserted} newly inserted, ${count} total in DB`
-	);
-}
+    inserted += res.length;
+  });
+
+  const countRows = await db
+    .select({ count: sqlCount() })
+    .from(schema.lmsReferences);
+
+  const totalCount = countRows.at(0)?.count ?? 0;
+
+  console.log(
+    `   ✔ ${rows.length} rows processed, ${inserted} newly inserted, ${totalCount} total in DB`,
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Clinics
 // ---------------------------------------------------------------------------
 
-const CLINIC_META: Record<string, { address: string; phone: string }> = {
-	"clinic-cairo-01": {
-		address: "12 Nile Corniche, Cairo",
-		phone: "+20 2 2574 0001"
-	},
-	"clinic-alex-01": {
-		address: "45 El-Horreya Rd, Alexandria",
-		phone: "+20 3 486 0002"
-	},
-	"clinic-giza-01": { address: "8 Giza St, Giza", phone: "+20 2 3570 0003" },
-	[CLINIC_HURGHADA_ID]: {
-		address: "El Nasr St., Hurghada, Red Sea Governorate",
-		phone: "+20 65 344 0000"
-	}
+const CLINIC_META = new Map<string, { address: string; phone: string }>([
+  [
+    'clinic-cairo-01',
+    {
+      address: '12 Nile Corniche, Cairo',
+      phone: '+20 2 2574 0001',
+    },
+  ],
+  [
+    'clinic-alex-01',
+    {
+      address: '45 El-Horreya Rd, Alexandria',
+      phone: '+20 3 486 0002',
+    },
+  ],
+  ['clinic-giza-01', { address: '8 Giza St, Giza', phone: '+20 2 3570 0003' }],
+  [
+    CLINIC_HURGHADA_ID,
+    {
+      address: 'El Nasr St., Hurghada, Red Sea Governorate',
+      phone: '+20 65 344 0000',
+    },
+  ],
+]);
+
+const seedClinics = async () => {
+  console.log('\n🏥 Seeding clinics…');
+
+  const rows = CLINICS.map((c) => {
+    const meta = CLINIC_META.get(c.id);
+
+    return {
+      id: c.id,
+      name: c.name,
+      address: meta?.address ?? null,
+      phone: meta?.phone ?? null,
+      email: `${c.id.replace('clinic-', '')}@clinic.eg`,
+    };
+  }) satisfies Array<typeof schema.clinics.$inferInsert>;
+
+  await db.insert(schema.clinics).values(rows).onConflictDoNothing();
+  console.log(`   ✔ ${rows.length} clinics ensured`);
 };
 
-async function seedClinics() {
-	console.log("\n🏥 Seeding clinics…");
+const seedCatalogs = async () => {
+  console.log('\n📚 Seeding vaccine and developmental catalogs…');
 
-	const rows = CLINICS.map(c => ({
-		id: c.id,
-		name: c.name,
-		address: CLINIC_META[c.id]?.address ?? null,
-		phone: CLINIC_META[c.id]?.phone ?? null,
-		email: `${c.id.replace("clinic-", "")}@clinic.eg`
-	})) satisfies (typeof schema.clinics.$inferInsert)[];
+  const vaccines = ROUTINE_CHILDHOOD_SCHEDULE.map((vaccine) => ({
+    id: vaccine.id,
+    label: vaccine.name,
+    disease: vaccine.diseaseTarget,
+    recommendedAgeMonths: vaccine.targetAgeMonths,
+    recommendedAgeLabel: vaccine.ageLabel,
+    schedule: 'demo',
+    isMandatoryMoh: false,
+    notes:
+      'Synthetic example only; not an official schedule. Confirm current local guidance.',
+  })) satisfies Array<typeof schema.vaccineCatalog.$inferInsert>;
 
-	await db.insert(schema.clinics).values(rows).onConflictDoNothing();
-	console.log(`   ✔ ${rows.length} clinics ensured`);
-}
+  await db.insert(schema.vaccineCatalog).values(vaccines).onConflictDoNothing();
 
-async function seedCatalogs() {
-	console.log("\n📚 Seeding vaccine and developmental catalogs…");
+  const milestones = DEVELOPMENTAL_MILESTONES.map((milestone) => ({
+    id: milestone.id,
+    label: milestone.title,
+    domain:
+      milestone.domain === 'social-emotional'
+        ? 'social-cognitive'
+        : milestone.domain,
+    expectedAgeMonths: milestone.targetAgeMonths,
+    ageLabel: milestone.ageLabel,
+    redFlagWarning:
+      milestone.isRedFlagIfMissing === true ? milestone.description : null,
+    notes: milestone.description,
+  })) satisfies Array<typeof schema.milestoneCatalog.$inferInsert>;
 
-	const vaccines = ROUTINE_CHILDHOOD_SCHEDULE.map(vaccine => ({
-		id: vaccine.id,
-		label: vaccine.name,
-		disease: vaccine.diseaseTarget,
-		recommendedAgeMonths: vaccine.targetAgeMonths,
-		recommendedAgeLabel: vaccine.ageLabel,
-		schedule: "demo",
-		isMandatoryMoh: false,
-		notes:
-			"Synthetic example only; not an official schedule. Confirm current local guidance."
-	})) satisfies (typeof schema.vaccineCatalog.$inferInsert)[];
-	await db.insert(schema.vaccineCatalog).values(vaccines).onConflictDoNothing();
+  await insertInChunks(milestones, async (part) => {
+    await db.insert(schema.milestoneCatalog).values(part).onConflictDoNothing();
+  });
 
-	const milestones = DEVELOPMENTAL_MILESTONES.map(milestone => ({
-		id: milestone.id,
-		label: milestone.title,
-		domain:
-			milestone.domain === "social-emotional"
-				? "social-cognitive"
-				: milestone.domain,
-		expectedAgeMonths: milestone.targetAgeMonths,
-		ageLabel: milestone.ageLabel,
-		redFlagWarning: milestone.isRedFlagIfMissing ? milestone.description : null,
-		notes: milestone.description
-	})) satisfies (typeof schema.milestoneCatalog.$inferInsert)[];
-	await insertInChunks(milestones, part =>
-		db.insert(schema.milestoneCatalog).values(part).onConflictDoNothing()
-	);
-
-	console.log(
-		`   ✔ ${vaccines.length} vaccine catalog entries and ${milestones.length} milestones ensured`
-	);
-}
+  console.log(
+    `   ✔ ${vaccines.length} vaccine catalog entries and ${milestones.length} milestones ensured`,
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Users
 // ---------------------------------------------------------------------------
 
-async function seedUsers() {
-	console.log("\n👩‍⚕️ Seeding users…");
+const seedUsers = async () => {
+  console.log('\n👩‍⚕️ Seeding users…');
 
-	const users = [
-		{
-			id: stableId("user:admin"),
-			name: "System Admin",
-			email: "admin@clinic.eg",
-			emailVerified: true,
-			createdAt: new Date("2024-01-01"),
-			updatedAt: new Date("2024-01-01"),
-			role: "admin" as const,
-			clinicId: CLINICS[0].id,
-			phone: "+20 100 000 0000"
-		},
-		{
-			id: stableId("user:doctor-sara"),
-			name: "Dr. Sara Hassan",
-			email: "sara.hassan@clinic.eg",
-			emailVerified: true,
-			createdAt: new Date("2024-02-10"),
-			updatedAt: new Date("2024-02-10"),
-			role: "doctor" as const,
-			clinicId: CLINICS[0].id,
-			phone: "+20 100 111 2222"
-		},
-		{
-			id: stableId("user:doctor-omar"),
-			name: "Dr. Omar El-Sayed",
-			email: "omar.elsayed@clinic.eg",
-			emailVerified: true,
-			createdAt: new Date("2024-03-05"),
-			updatedAt: new Date("2024-03-05"),
-			role: "doctor" as const,
-			clinicId: CLINICS[1].id,
-			phone: "+20 100 333 4444"
-		},
-		{
-			id: stableId("user:staff-nour"),
-			name: "Nour Abdelrahman",
-			email: "nour.a@clinic.eg",
-			emailVerified: true,
-			createdAt: new Date("2024-04-01"),
-			updatedAt: new Date("2024-04-01"),
-			role: "staff" as const,
-			clinicId: CLINICS[2].id,
-			phone: "+20 100 555 6666"
-		}
-	];
+  const users = [
+    {
+      id: stableId('user:admin'),
+      name: 'System Admin',
+      email: 'admin@clinic.eg',
+      emailVerified: true,
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
+      role: 'admin' as const,
+      clinicId: CLINICS[0].id,
+      phone: '+20 100 000 0000',
+    },
+    {
+      id: stableId('user:doctor-sara'),
+      name: 'Dr. Sara Hassan',
+      email: 'sara.hassan@clinic.eg',
+      emailVerified: true,
+      createdAt: new Date('2024-02-10'),
+      updatedAt: new Date('2024-02-10'),
+      role: 'doctor' as const,
+      clinicId: CLINICS[0].id,
+      phone: '+20 100 111 2222',
+    },
+    {
+      id: stableId('user:doctor-omar'),
+      name: 'Dr. Omar El-Sayed',
+      email: 'omar.elsayed@clinic.eg',
+      emailVerified: true,
+      createdAt: new Date('2024-03-05'),
+      updatedAt: new Date('2024-03-05'),
+      role: 'doctor' as const,
+      clinicId: CLINICS[1].id,
+      phone: '+20 100 333 4444',
+    },
+    {
+      id: stableId('user:staff-nour'),
+      name: 'Nour Abdelrahman',
+      email: 'nour.a@clinic.eg',
+      emailVerified: true,
+      createdAt: new Date('2024-04-01'),
+      updatedAt: new Date('2024-04-01'),
+      role: 'staff' as const,
+      clinicId: CLINICS[2].id,
+      phone: '+20 100 555 6666',
+    },
+  ];
 
-	await insertInChunks(users, part =>
-		db.insert(schema.user).values(part).onConflictDoNothing()
-	);
-	console.log(`   ✔ ${users.length} users ensured`);
-}
+  await insertInChunks(users, async (part) => {
+    await db.insert(schema.user).values(part).onConflictDoNothing();
+  });
+  console.log(`   ✔ ${users.length} users ensured`);
+};
 
 // ---------------------------------------------------------------------------
 // Patients + visits + measurements
 // ---------------------------------------------------------------------------
 
 interface PatientSpec {
-	seedKey: string;
-	firstName: string;
-	lastName: string;
-	sex: Sex;
-	dob: string;
-	clinicId: string;
+  seedKey: string;
+  firstName: string;
+  lastName: string;
+  sex: Sex;
+  dob: string;
+  clinicId: string;
 }
 
 /** Pinned so DOB (and thus stableId) never drifts across calendar years. */
 const REFERENCE_YEAR = 2025;
 
-function buildPatientSpecs(n: number): PatientSpec[] {
-	const specs: PatientSpec[] = [];
-	for (let i = 0; i < n; i++) {
-		const isMale = rand() > 0.5;
-		const first = isMale ? pick(EGYPTIAN_FIRST_M) : pick(EGYPTIAN_FIRST_F);
-		const last = pick(EGYPTIAN_LAST);
-		const clinic = pick(CLINICS).id;
+const buildPatientSpecs = (n: number): Array<PatientSpec> => {
+  const specs: Array<PatientSpec> = [];
 
-		const yearsAgo = Math.floor(randBetween(0, 5));
-		const month = 1 + Math.floor(randBetween(0, 12));
-		const day = 1 + Math.floor(randBetween(0, 28));
-		const dob = isoDate(REFERENCE_YEAR - yearsAgo, month, day);
+  for (let i = 0; i < n; i += 1) {
+    const isMale = rand() > 0.5;
+    const first = isMale ? pick(EGYPTIAN_FIRST_M) : pick(EGYPTIAN_FIRST_F);
+    const last = pick(EGYPTIAN_LAST);
+    const clinic = pick(CLINICS).id;
 
-		specs.push({
-			seedKey: `patient:${i}:${first}:${last}:${dob}`,
-			firstName: first,
-			lastName: last,
-			sex: isMale ? "male" : "female",
-			dob,
-			clinicId: clinic
-		});
-	}
-	return specs;
-}
+    const yearsAgo = Math.floor(randBetween(0, 5));
+    const month = 1 + Math.floor(randBetween(0, 12));
+    const day = 1 + Math.floor(randBetween(0, 28));
+    const dob = isoDate(REFERENCE_YEAR - yearsAgo, month, day);
 
-function referenceValue(
-	indicator: MeasurementIndicator | "head-circumference-for-age",
-	sex: Sex,
-	ageMo: number
-): number {
-	if (indicator === "head-circumference-for-age") {
-		const base = sex === "male" ? 34.5 : 33.9;
-		return round(base + Math.min(ageMo, 24) * 0.35 + randBetween(-0.6, 0.6), 1);
-	}
+    specs.push({
+      seedKey: `patient:${i}:${first}:${last}:${dob}`,
+      firstName: first,
+      lastName: last,
+      sex: isMale ? 'male' : 'female',
+      dob,
+      clinicId: clinic,
+    });
+  }
 
-	const rows = LMS_SEED.filter(
-		r => r.indicator === indicator && r.sex === sex && r.xAxis === "age"
-	);
-	if (!rows.length) return round(randBetween(3, 10), 2);
+  return specs;
+};
 
-	let best = rows[0];
-	if (!best) return round(randBetween(3, 10), 2);
+const referenceValue = (
+  indicator: MeasurementIndicator | 'head-circumference-for-age',
+  sex: Sex,
+  ageMo: number,
+): number => {
+  if (indicator === 'head-circumference-for-age') {
+    const base = sex === 'male' ? 34.5 : 33.9;
 
-	let bestD = Math.abs(best.xValue - ageMo);
-	for (const r of rows) {
-		const d = Math.abs(r.xValue - ageMo);
-		if (d < bestD) {
-			best = r;
-			bestD = d;
-		}
-	}
+    return round(base + Math.min(ageMo, 24) * 0.35 + randBetween(-0.6, 0.6), 1);
+  }
 
-	const { l: L, m, s } = best;
-	const z = clampGaussian(randBetween(-2, 2));
-	const value =
-		Math.abs(L) < 1e-9 ? m * Math.exp(s * z) : m * (1 + L * s * z) ** (1 / L);
-	return round(value, 2);
-}
+  const rows = LMS_SEED.filter(
+    (r) => r.indicator === indicator && r.sex === sex && r.xAxis === 'age',
+  );
 
-async function seedPatients() {
-	console.log("\n🧒 Seeding patients, visits, measurements…");
+  if (!rows.length) {
+    return round(randBetween(3, 10), 2);
+  }
 
-	const specs = buildPatientSpecs(60);
+  let best = rows.at(0);
 
-	const patientRows = specs.map(s => ({
-		id: stableId(s.seedKey),
-		clinicId: s.clinicId,
-		mrn: `MRN-${(s.seedKey.split(":")[1] ?? "0").padStart(5, "0")}`,
-		firstName: s.firstName,
-		lastName: s.lastName,
-		sex: s.sex,
-		dateOfBirth: s.dob,
-		parentName: `${pick(EGYPTIAN_FIRST_F)} ${s.lastName}`,
-		parentPhone: `+20 10${String(100_000_000 + Math.floor(rand() * 899_999_999)).slice(0, 9)}`,
-		address: `${pick(["Nasr City", "Maadi", "Smouha", "Dokki", "Hurghada"] as const)}, Egypt`
-	}));
+  if (best === undefined) {
+    return round(randBetween(3, 10), 2);
+  }
 
-	await insertInChunks(patientRows, part =>
-		db
-			.insert(schema.patients)
-			.values(part)
-			.onConflictDoUpdate({
-				target: schema.patients.id,
-				set: { clinicId: drizzleSql`excluded.clinic_id` }
-			})
-	);
-	console.log(`   ✔ ${patientRows.length} patients ensured`);
+  let bestD = Math.abs(best.xValue - ageMo);
 
-	const visitRows: (typeof schema.visits.$inferInsert)[] = [];
-	const measurementRows: (typeof schema.measurements.$inferInsert)[] = [];
-	const visitIdsByPatient = new Map<string, string[]>();
-	const patientIdByVisitId = new Map<string, string>();
-	const visitedAtByVisitId = new Map<string, Date>();
+  for (const r of rows) {
+    const d = Math.abs(r.xValue - ageMo);
 
-	for (const p of patientRows) {
-		const nVisits = 2 + Math.floor(rand() * 4);
-		const maxAgeMonths = Math.floor(
-			ageMonths(p.dateOfBirth, new Date().toISOString())
-		);
-		const pVisitIds: string[] = [];
+    if (d < bestD) {
+      best = r;
+      bestD = d;
+    }
+  }
 
-		for (let v = 0; v < nVisits; v++) {
-			const visitAgeMonths = Math.floor(
-				((v + 1) * maxAgeMonths) / (nVisits + 1)
-			);
-			const visitedAtIso = addMonths(p.dateOfBirth, visitAgeMonths);
-			const visitedAt = new Date(`${visitedAtIso}T09:00:00.000Z`);
-			const ageMo = ageMonths(p.dateOfBirth, visitedAtIso);
-			const visitId = stableId(`visit:${p.id}:${visitedAtIso}`);
+  const { l: L, m, s } = best;
+  const z = clampGaussian(randBetween(-2, 2));
 
-			pVisitIds.push(visitId);
-			patientIdByVisitId.set(visitId, p.id);
-			visitedAtByVisitId.set(visitId, visitedAt);
+  const value =
+    Math.abs(L) < 1e-9 ? m * Math.exp(s * z) : m * (1 + L * s * z) ** (1 / L);
 
-			visitRows.push({
-				id: visitId,
-				patientId: p.id,
-				clinicId: p.clinicId,
-				visitedAt,
-				ageMonths: ageMo,
-				ageYears: Math.floor(ageMo / 12),
-				ageMonthsRemainder: Math.floor(ageMo % 12)
-			});
+  return round(value, 2);
+};
 
-			const chosen: Array<MeasurementIndicator | "head-circumference-for-age"> =
-				["weight-for-age", "length-for-age"];
-			if (ageMo >= 24) chosen.push("bmi-for-age");
-			if (ageMo < 24) chosen.push("head-circumference-for-age");
+const seedPatients = async () => {
+  console.log('\n🧒 Seeding patients, visits, measurements…');
 
-			for (const indicator of chosen) {
-				const value = referenceValue(indicator, p.sex, ageMo);
+  const specs = buildPatientSpecs(60);
 
-				let lmsL: number | null = null;
-				let lmsM: number | null = null;
-				let lmsS: number | null = null;
-				let zScore: number | null = null;
+  const patientRows = specs.map((s) => ({
+    id: stableId(s.seedKey),
+    clinicId: s.clinicId,
+    mrn: `MRN-${(s.seedKey.split(':')[1] ?? '0').padStart(5, '0')}`,
+    firstName: s.firstName,
+    lastName: s.lastName,
+    sex: s.sex,
+    dateOfBirth: s.dob,
+    parentName: `${pick(EGYPTIAN_FIRST_F)} ${s.lastName}`,
+    parentPhone: `+20 10${String(100_000_000 + Math.floor(rand() * 899_999_999)).slice(0, 9)}`,
+    address: `${pick(['Nasr City', 'Maadi', 'Smouha', 'Dokki', 'Hurghada'] as const)}, Egypt`,
+  }));
 
-				if (indicator !== "head-circumference-for-age") {
-					const rows = LMS_SEED.filter(
-						r =>
-							r.indicator === indicator && r.sex === p.sex && r.xAxis === "age"
-					);
-					if (rows.length) {
-						let best: (typeof rows)[number] | undefined;
-						let bestD = Number.POSITIVE_INFINITY;
-						for (const r of rows) {
-							const d = Math.abs(r.xValue - ageMo);
-							if (d < bestD) {
-								best = r;
-								bestD = d;
-							}
-						}
-						if (!best) throw new Error(`Missing LMS seed row for ${indicator}`);
-						lmsL = best.l;
-						lmsM = best.m;
-						lmsS = best.s;
-						try {
-							zScore = round(zFromLms(value, best.l, best.m, best.s), 2);
-						} catch {
-							zScore = null;
-						}
-					}
-				}
+  await insertInChunks(patientRows, async (part) => {
+    await db
+      .insert(schema.patients)
+      .values(part)
+      .onConflictDoUpdate({
+        target: schema.patients.id,
+        set: { clinicId: drizzleSql`excluded.clinic_id` },
+      });
+  });
+  console.log(`   ✔ ${patientRows.length} patients ensured`);
 
-				const percentile =
-					zScore === null ? null : round(normalCdf(zScore) * 100, 1);
-				const classification = classify(indicator, zScore);
-				const measId = stableId(`meas:${visitId}:${indicator}`);
+  const visitRows: Array<typeof schema.visits.$inferInsert> = [];
+  const measurementRows: Array<typeof schema.measurements.$inferInsert> = [];
+  const visitIdsByPatient = new Map<string, Array<string>>();
+  const patientIdByVisitId = new Map<string, string>();
+  const visitedAtByVisitId = new Map<string, Date>();
 
-				measurementRows.push({
-					id: measId,
-					visitId,
-					patientId: p.id,
-					measuredAt: visitedAt,
-					indicator,
-					value,
-					zScore,
-					percentile,
-					classification,
-					lmsL,
-					lmsM,
-					lmsS
-				});
-			}
-		}
+  for (const p of patientRows) {
+    const nVisits = 2 + Math.floor(rand() * 4);
 
-		visitIdsByPatient.set(p.id, pVisitIds);
-	}
+    const maxAgeMonths = Math.floor(
+      ageMonths(p.dateOfBirth, new Date().toISOString()),
+    );
 
-	await insertInChunks(visitRows, part =>
-		db
-			.insert(schema.visits)
-			.values(part)
-			.onConflictDoUpdate({
-				target: schema.visits.id,
-				set: { clinicId: drizzleSql`excluded.clinic_id` }
-			})
-	);
+    const pVisitIds: Array<string> = [];
 
-	await insertInChunks(measurementRows, part =>
-		db.insert(schema.measurements).values(part).onConflictDoNothing()
-	);
+    for (let v = 0; v < nVisits; v += 1) {
+      const visitAgeMonths = Math.floor(
+        ((v + 1) * maxAgeMonths) / (nVisits + 1),
+      );
 
-	console.log(`   ✔ ${visitRows.length} visits ensured`);
-	console.log(`   ✔ ${measurementRows.length} measurements ensured`);
+      const visitedAtIso = addMonths(p.dateOfBirth, visitAgeMonths);
+      const visitedAt = new Date(`${visitedAtIso}T09:00:00.000Z`);
+      const ageMo = ageMonths(p.dateOfBirth, visitedAtIso);
+      const visitId = stableId(`visit:${p.id}:${visitedAtIso}`);
 
-	return {
-		patients: patientRows,
-		visitIds: visitRows.map(v => {
-			if (v.id === undefined) throw new Error("Visit is missing an ID");
-			return v.id;
-		}),
-		visitIdsByPatient,
-		patientIdByVisitId,
-		visitedAtByVisitId
-	};
-}
+      pVisitIds.push(visitId);
+      patientIdByVisitId.set(visitId, p.id);
+      visitedAtByVisitId.set(visitId, visitedAt);
+
+      visitRows.push({
+        id: visitId,
+        patientId: p.id,
+        clinicId: p.clinicId,
+        visitedAt,
+        ageMonths: ageMo,
+        ageYears: Math.floor(ageMo / 12),
+        ageMonthsRemainder: Math.floor(ageMo % 12),
+      });
+
+      const chosen: Array<MeasurementIndicator | 'head-circumference-for-age'> =
+        ['weight-for-age', 'length-for-age'];
+
+      if (ageMo >= 24) {
+        chosen.push('bmi-for-age');
+      }
+
+      if (ageMo < 24) {
+        chosen.push('head-circumference-for-age');
+      }
+
+      for (const indicator of chosen) {
+        const value = referenceValue(indicator, p.sex, ageMo);
+
+        let lmsL: number | null = null;
+        let lmsM: number | null = null;
+        let lmsS: number | null = null;
+        let zScore: number | null = null;
+
+        if (indicator !== 'head-circumference-for-age') {
+          const rows = LMS_SEED.filter(
+            (r) =>
+              r.indicator === indicator && r.sex === p.sex && r.xAxis === 'age',
+          );
+
+          if (rows.length) {
+            let best: (typeof rows)[number] | undefined;
+            let bestD = Number.POSITIVE_INFINITY;
+
+            for (const r of rows) {
+              const d = Math.abs(r.xValue - ageMo);
+
+              if (d < bestD) {
+                best = r;
+                bestD = d;
+              }
+            }
+
+            if (!best) {
+              throw new Error(`Missing LMS seed row for ${indicator}`);
+            }
+
+            lmsL = best.l;
+            lmsM = best.m;
+            lmsS = best.s;
+
+            try {
+              zScore = round(zFromLms(value, best.l, best.m, best.s), 2);
+            } catch {
+              zScore = null;
+            }
+          }
+        }
+
+        const percentile =
+          zScore === null ? null : round(normalCdf(zScore) * 100, 1);
+
+        const classification = classify(indicator, zScore);
+        const measId = stableId(`meas:${visitId}:${indicator}`);
+
+        measurementRows.push({
+          id: measId,
+          visitId,
+          patientId: p.id,
+          measuredAt: visitedAt,
+          indicator,
+          value,
+          zScore,
+          percentile,
+          classification,
+          lmsL,
+          lmsM,
+          lmsS,
+        });
+      }
+    }
+
+    visitIdsByPatient.set(p.id, pVisitIds);
+  }
+
+  await insertInChunks(visitRows, async (part) => {
+    await db
+      .insert(schema.visits)
+      .values(part)
+      .onConflictDoUpdate({
+        target: schema.visits.id,
+        set: { clinicId: drizzleSql`excluded.clinic_id` },
+      });
+  });
+
+  await insertInChunks(measurementRows, async (part) => {
+    await db.insert(schema.measurements).values(part).onConflictDoNothing();
+  });
+
+  console.log(`   ✔ ${visitRows.length} visits ensured`);
+  console.log(`   ✔ ${measurementRows.length} measurements ensured`);
+
+  return {
+    patients: patientRows,
+    visitIds: visitRows.map((v) => {
+      if (v.id === undefined) {
+        throw new Error('Visit is missing an ID');
+      }
+
+      return v.id;
+    }),
+    visitIdsByPatient,
+    patientIdByVisitId,
+    visitedAtByVisitId,
+  };
+};
 
 // ---------------------------------------------------------------------------
 // Appointments
 // ---------------------------------------------------------------------------
 
-async function seedAppointments(
-	patients: Array<{ id: string; clinicId: string | null }>
-) {
-	console.log("\n📅 Seeding appointments…");
+const seedAppointments = async (
+  patients: Array<{ id: string; clinicId: string | null }>,
+) => {
+  console.log('\n📅 Seeding appointments…');
 
-	const reasonPool = [
-		"Fever",
-		"Cough",
-		"Well-child visit",
-		"Immunization",
-		"Follow-up",
-		"Rash",
-		"Ear pain",
-		"Poor feeding",
-		"Loose stools"
-	] as const;
+  const reasonPool = [
+    'Fever',
+    'Cough',
+    'Well-child visit',
+    'Immunization',
+    'Follow-up',
+    'Rash',
+    'Ear pain',
+    'Poor feeding',
+    'Loose stools',
+  ] as const;
 
-	const rows: (typeof schema.appointments.$inferInsert)[] = [];
-	const now = Date.now();
-	const DAY = 86_400_000;
+  const rows: Array<typeof schema.appointments.$inferInsert> = [];
+  const now = Date.now();
+  const DAY = 86_400_000;
 
-	for (const patient of patients) {
-		const n = 3 + Math.floor(rand() * 6);
-		for (let i = 0; i < n; i++) {
-			const offsetDays =
-				rand() < 0.6
-					? -Math.floor(rand() * 365) - 1
-					: Math.floor(rand() * 60) + 1;
+  for (const patient of patients) {
+    const n = 3 + Math.floor(rand() * 6);
 
-			const scheduledAt = new Date(now + offsetDays * DAY);
-			scheduledAt.setUTCHours(
-				9 + Math.floor(rand() * 8),
-				Math.floor(rand() * 4) * 15,
-				0,
-				0
-			);
+    for (let i = 0; i < n; i += 1) {
+      const offsetDays =
+        rand() < 0.6
+          ? -Math.floor(rand() * 365) - 1
+          : Math.floor(rand() * 60) + 1;
 
-			const status =
-				offsetDays < 0
-					? pick([
-							"completed",
-							"completed",
-							"completed",
-							"cancelled",
-							"no-show"
-						] as const)
-					: "scheduled";
+      const scheduledAt = new Date(now + offsetDays * DAY);
+      scheduledAt.setUTCHours(
+        9 + Math.floor(rand() * 8),
+        Math.floor(rand() * 4) * 15,
+        0,
+        0,
+      );
 
-			rows.push({
-				id: stableId(`appt:${patient.id}:${scheduledAt.toISOString()}`),
-				patientId: patient.id,
-				clinicId: patient.clinicId ?? CLINICS[0].id,
-				doctorId: null,
-				scheduledAt,
-				durationMinutes: pick([10, 15, 15, 20, 30] as const),
-				status,
-				reason: pick(reasonPool),
-				notes: rand() < 0.2 ? "Rescheduled from previous slot." : null
-			});
-		}
-	}
+      const status =
+        offsetDays < 0
+          ? pick([
+              'completed',
+              'completed',
+              'completed',
+              'cancelled',
+              'no-show',
+            ] as const)
+          : 'scheduled';
 
-	await insertInChunks(rows, part =>
-		db.insert(schema.appointments).values(part).onConflictDoNothing()
-	);
-	console.log(`   ✔ ${rows.length} appointments ensured`);
-}
+      rows.push({
+        id: stableId(`appt:${patient.id}:${scheduledAt.toISOString()}`),
+        patientId: patient.id,
+        clinicId: patient.clinicId ?? CLINICS[0].id,
+        doctorId: null,
+        scheduledAt,
+        durationMinutes: pick([10, 15, 15, 20, 30] as const),
+        status,
+        reason: pick(reasonPool),
+        notes: rand() < 0.2 ? 'Rescheduled from previous slot.' : null,
+      });
+    }
+  }
+
+  await insertInChunks(rows, async (part) => {
+    await db.insert(schema.appointments).values(part).onConflictDoNothing();
+  });
+  console.log(`   ✔ ${rows.length} appointments ensured`);
+};
 
 // ---------------------------------------------------------------------------
 // Immunizations, milestones, and certificates
 // ---------------------------------------------------------------------------
 
-async function seedMilestones(
-	patients: Array<{ id: string; dateOfBirth: string }>
-) {
-	console.log("\n🧩 Seeding developmental milestone records…");
+const seedMilestones = async (
+  patients: Array<{ id: string; dateOfBirth: string }>,
+) => {
+  console.log('\n🧩 Seeding developmental milestone records…');
 
-	const rows: (typeof schema.milestones.$inferInsert)[] = [];
-	for (const patient of patients) {
-		const ageAtReference = Math.max(
-			0,
-			ageMonths(patient.dateOfBirth, "2025-01-01")
-		);
-		for (const milestone of DEVELOPMENTAL_MILESTONES) {
-			if (milestone.targetAgeMonths > Math.max(ageAtReference, 2)) continue;
-			const achieved = milestone.targetAgeMonths <= ageAtReference;
-			rows.push({
-				id: stableId(`milestone:${patient.id}:${milestone.id}`),
-				patientId: patient.id,
-				milestoneId: milestone.id,
-				isAchieved: achieved,
-				achievedDate: achieved
-					? addMonths(patient.dateOfBirth, milestone.targetAgeMonths)
-					: null,
-				notes: "Synthetic sample record."
-			});
-		}
-	}
+  const rows: Array<typeof schema.milestones.$inferInsert> = [];
 
-	await insertInChunks(rows, part =>
-		db.insert(schema.milestones).values(part).onConflictDoNothing()
-	);
-	console.log(`   ✔ ${rows.length} milestone records ensured`);
-}
+  for (const patient of patients) {
+    const ageAtReference = Math.max(
+      0,
+      ageMonths(patient.dateOfBirth, '2025-01-01'),
+    );
 
-async function seedCertificates(
-	patients: Array<{ id: string; firstName: string; lastName: string }>
-) {
-	console.log("\n📄 Seeding sample certificates…");
+    for (const milestone of DEVELOPMENTAL_MILESTONES) {
+      if (milestone.targetAgeMonths > Math.max(ageAtReference, 2)) {
+        continue;
+      }
 
-	const rows = patients
-		.filter((_, index) => index % 5 === 0)
-		.map(patient => ({
-			id: stableId(`certificate:well-child:${patient.id}`),
-			patientId: patient.id,
-			issueDate: "2025-01-15",
-			certificateType: "well-child",
-			title: "Well-child visit summary",
-			body: `This is a synthetic sample certificate for ${patient.firstName} ${patient.lastName}.`,
-			issuedBy: "Demo pediatric clinic",
-			notes: "For development and demonstration only."
-		})) satisfies (typeof schema.certificates.$inferInsert)[];
+      const achieved = milestone.targetAgeMonths <= ageAtReference;
+      rows.push({
+        id: stableId(`milestone:${patient.id}:${milestone.id}`),
+        patientId: patient.id,
+        milestoneId: milestone.id,
+        isAchieved: achieved,
+        achievedDate: achieved
+          ? addMonths(patient.dateOfBirth, milestone.targetAgeMonths)
+          : null,
+        notes: 'Synthetic sample record.',
+      });
+    }
+  }
 
-	await insertInChunks(rows, part =>
-		db.insert(schema.certificates).values(part).onConflictDoNothing()
-	);
-	console.log(`   ✔ ${rows.length} sample certificates ensured`);
-}
+  await insertInChunks(rows, async (part) => {
+    await db.insert(schema.milestones).values(part).onConflictDoNothing();
+  });
+  console.log(`   ✔ ${rows.length} milestone records ensured`);
+};
 
-async function seedImmunizations(
-	patients: Array<{ id: string; dateOfBirth: string }>
-) {
-	console.log("\n💉 Seeding synthetic immunization records…");
+const seedCertificates = async (
+  patients: Array<{ id: string; firstName: string; lastName: string }>,
+) => {
+  console.log('\n📄 Seeding sample certificates…');
 
-	const rows: (typeof schema.immunizations.$inferInsert)[] = [];
-	for (const [patientIndex, patient] of patients.entries()) {
-		for (const [doseIndex, vaccine] of ROUTINE_CHILDHOOD_SCHEDULE.entries()) {
-			const dueDate = addMonths(patient.dateOfBirth, vaccine.targetAgeMonths);
-			const administered =
-				(patientIndex + doseIndex) % 2 === 0 &&
-				dueDate <= new Date().toISOString().slice(0, 10);
-			rows.push({
-				id: stableId(`immunization:${patient.id}:${vaccine.id}`),
-				patientId: patient.id,
-				vaccineId: vaccine.id,
-				vaccineKey: vaccine.vaccineKey,
-				vaccineName: vaccine.name,
-				doseNumber: vaccine.doseNumber,
-				targetAgeMonths: vaccine.targetAgeMonths,
-				status: administered
-					? "administered"
-					: dueDate <= new Date().toISOString().slice(0, 10)
-						? "due"
-						: "planned",
-				administeredDate: administered
-					? new Date(`${dueDate}T09:00:00.000Z`)
-					: null,
-				dueDate,
-				route: vaccine.route,
-				site: vaccine.site,
-				lotNumber: administered ? `DEMO-LOT-${patientIndex + 1}` : null,
-				administeredByName: administered ? "Synthetic seed fixture" : null,
-				notes: "Synthetic sample record."
-			});
-		}
-	}
+  const rows: Array<typeof schema.certificates.$inferInsert> = [];
 
-	await insertInChunks(rows, part =>
-		db.insert(schema.immunizations).values(part).onConflictDoNothing()
-	);
-	console.log(`   ✔ ${rows.length} synthetic immunization records ensured`);
-}
+  for (const [index, patient] of patients.entries()) {
+    if (index % 5 === 0) {
+      rows.push({
+        id: stableId(`certificate:well-child:${patient.id}`),
+        patientId: patient.id,
+        issueDate: '2025-01-15',
+        certificateType: 'well-child',
+        title: 'Well-child visit summary',
+        body: `This is a synthetic sample certificate for ${patient.firstName} ${patient.lastName}.`,
+        issuedBy: 'Demo pediatric clinic',
+        notes: 'For development and demonstration only.',
+      });
+    }
+  }
+
+  await insertInChunks(rows, async (part) => {
+    await db.insert(schema.certificates).values(part).onConflictDoNothing();
+  });
+  console.log(`   ✔ ${rows.length} sample certificates ensured`);
+};
+
+const seedImmunizations = async (
+  patients: Array<{ id: string; dateOfBirth: string }>,
+) => {
+  console.log('\n💉 Seeding synthetic immunization records…');
+
+  const rows: Array<typeof schema.immunizations.$inferInsert> = [];
+  const todayIso = new Date().toISOString().slice(0, 10);
+
+  for (const [patientIndex, patient] of patients.entries()) {
+    for (const [doseIndex, vaccine] of ROUTINE_CHILDHOOD_SCHEDULE.entries()) {
+      const dueDate = addMonths(patient.dateOfBirth, vaccine.targetAgeMonths);
+
+      const administered =
+        (patientIndex + doseIndex) % 2 === 0 && dueDate <= todayIso;
+
+      let status: 'administered' | 'due' | 'planned' = 'planned';
+
+      if (administered) {
+        status = 'administered';
+      } else if (dueDate <= todayIso) {
+        status = 'due';
+      }
+
+      rows.push({
+        id: stableId(`immunization:${patient.id}:${vaccine.id}`),
+        patientId: patient.id,
+        vaccineId: vaccine.id,
+        vaccineKey: vaccine.vaccineKey,
+        vaccineName: vaccine.name,
+        doseNumber: vaccine.doseNumber,
+        targetAgeMonths: vaccine.targetAgeMonths,
+        status,
+        administeredDate: administered
+          ? new Date(`${dueDate}T09:00:00.000Z`)
+          : null,
+        dueDate,
+        route: vaccine.route,
+        site: vaccine.site,
+        lotNumber: administered ? `DEMO-LOT-${patientIndex + 1}` : null,
+        administeredByName: administered ? 'Synthetic seed fixture' : null,
+        notes: 'Synthetic sample record.',
+      });
+    }
+  }
+
+  await insertInChunks(rows, async (part) => {
+    await db.insert(schema.immunizations).values(part).onConflictDoNothing();
+  });
+  console.log(`   ✔ ${rows.length} synthetic immunization records ensured`);
+};
 
 // ---------------------------------------------------------------------------
 // Diagnoses
 // ---------------------------------------------------------------------------
 
-async function seedDiagnoses(visitIds: string[]) {
-	console.log("\n🩺 Seeding diagnoses…");
+const seedDiagnoses = async (visitIds: Array<string>) => {
+  console.log('\n🩺 Seeding diagnoses…');
 
-	const rows: (typeof schema.diagnoses.$inferInsert)[] = [];
-	for (const visitId of visitIds) {
-		const n = 1 + Math.floor(rand() * 3);
-		const chosen = new Set<string>();
-		let primaryAssigned = false;
-		for (let i = 0; i < n; i++) {
-			let code: string;
-			do {
-				code = pick(ICD_POOL).code;
-			} while (chosen.has(code));
-			chosen.add(code);
-			const entry = ICD_POOL.find(e => e.code === code);
-			if (!entry) {
-				throw new Error(`ICD code ${code} not found`);
-			}
-			rows.push({
-				id: stableId(`dx:${visitId}:${code}`),
-				visitId,
-				icdCode: entry.code,
-				description: entry.desc,
-				type: primaryAssigned ? "secondary" : "primary"
-			});
-			primaryAssigned = true;
-		}
-	}
+  const rows: Array<typeof schema.diagnoses.$inferInsert> = [];
 
-	await insertInChunks(rows, part =>
-		db.insert(schema.diagnoses).values(part).onConflictDoNothing()
-	);
-	console.log(`   ✔ ${rows.length} diagnoses ensured`);
-}
+  for (const visitId of visitIds) {
+    const n = 1 + Math.floor(rand() * 3);
+    const chosen = new Set<string>();
+    let primaryAssigned = false;
+
+    for (let i = 0; i < n; i += 1) {
+      let code: string;
+
+      do {
+        ({ code } = pick(ICD_POOL));
+      } while (chosen.has(code));
+
+      chosen.add(code);
+      const entry = ICD_POOL.find((e) => e.code === code);
+
+      if (!entry) {
+        throw new Error(`ICD code ${code} not found`);
+      }
+
+      rows.push({
+        id: stableId(`dx:${visitId}:${code}`),
+        visitId,
+        icdCode: entry.code,
+        description: entry.desc,
+        type: primaryAssigned ? 'secondary' : 'primary',
+      });
+      primaryAssigned = true;
+    }
+  }
+
+  await insertInChunks(rows, async (part) => {
+    await db.insert(schema.diagnoses).values(part).onConflictDoNothing();
+  });
+  console.log(`   ✔ ${rows.length} diagnoses ensured`);
+};
 
 // ---------------------------------------------------------------------------
 // Prescriptions
 // ---------------------------------------------------------------------------
 
-async function seedPrescriptions(
-	visitIds: string[],
-	patientIdByVisitId: Map<string, string>,
-	visitedAtByVisitId: Map<string, Date>
-) {
-	console.log("\n💊 Seeding prescriptions…");
+const seedPrescriptions = async (
+  visitIds: Array<string>,
+  patientIdByVisitId: Map<string, string>,
+  visitedAtByVisitId: Map<string, Date>,
+) => {
+  console.log('\n💊 Seeding prescriptions…');
 
-	const rows: (typeof schema.prescriptions.$inferInsert)[] = [];
+  const rows: Array<typeof schema.prescriptions.$inferInsert> = [];
 
-	for (const visitId of visitIds) {
-		if (rand() > 0.6) continue;
-		const patientId = patientIdByVisitId.get(visitId);
-		if (!patientId) continue;
-		const prescribedAt = visitedAtByVisitId.get(visitId) ?? new Date();
+  for (const visitId of visitIds) {
+    if (rand() > 0.6) {
+      continue;
+    }
 
-		const n = 1 + Math.floor(rand() * 3);
-		const chosen = new Set<string>();
-		for (let i = 0; i < n; i++) {
-			let d: (typeof DRUG_POOL)[number];
-			do {
-				d = pick(DRUG_POOL);
-			} while (chosen.has(d.name));
-			chosen.add(d.name);
+    const patientId = patientIdByVisitId.get(visitId);
 
-			rows.push({
-				id: stableId(`rx:${visitId}:${d.name}`),
-				visitId,
-				patientId,
-				prescribedById: null,
-				medicationName: d.name,
-				dosage: d.dose,
-				frequency: d.freq,
-				durationDays: d.days,
-				instructions:
-					rand() < 0.4
-						? "Complete the full course even if symptoms improve."
-						: null,
-				prescribedAt
-			});
-		}
-	}
+    if (patientId === undefined || patientId === '') {
+      continue;
+    }
 
-	await insertInChunks(rows, part =>
-		db.insert(schema.prescriptions).values(part).onConflictDoNothing()
-	);
-	console.log(`   ✔ ${rows.length} prescriptions ensured`);
-}
+    const prescribedAt = visitedAtByVisitId.get(visitId) ?? new Date();
+
+    const n = 1 + Math.floor(rand() * 3);
+    const chosen = new Set<string>();
+
+    for (let i = 0; i < n; i += 1) {
+      let d: (typeof DRUG_POOL)[number];
+
+      do {
+        d = pick(DRUG_POOL);
+      } while (chosen.has(d.name));
+
+      chosen.add(d.name);
+
+      rows.push({
+        id: stableId(`rx:${visitId}:${d.name}`),
+        visitId,
+        patientId,
+        prescribedById: null,
+        medicationName: d.name,
+        dosage: d.dose,
+        frequency: d.freq,
+        durationDays: d.days,
+        instructions:
+          rand() < 0.4
+            ? 'Complete the full course even if symptoms improve.'
+            : null,
+        prescribedAt,
+      });
+    }
+  }
+
+  await insertInChunks(rows, async (part) => {
+    await db.insert(schema.prescriptions).values(part).onConflictDoNothing();
+  });
+  console.log(`   ✔ ${rows.length} prescriptions ensured`);
+};
 
 // ---------------------------------------------------------------------------
 // Medical notes
 // ---------------------------------------------------------------------------
 
-async function seedMedicalNotes(visitIdsByPatient: Map<string, string[]>) {
-	console.log("\n📝 Seeding medical notes…");
+const seedMedicalNotes = async (
+  visitIdsByPatient: Map<string, Array<string>>,
+) => {
+  console.log('\n📝 Seeding medical notes…');
 
-	const rows: (typeof schema.medicalNotes.$inferInsert)[] = [];
-	for (const [patientId, patientVisitIds] of visitIdsByPatient) {
-		if (rand() > 0.3) continue;
-		const n = 1 + Math.floor(rand() * 2);
-		for (let i = 0; i < n; i++) {
-			const t = pick(NOTE_TEMPLATES);
-			rows.push({
-				id: stableId(`note:${patientId}:${t.title}:${i}`),
-				patientId,
-				visitId:
-					patientVisitIds.length > 0 && rand() < 0.7
-						? pick(patientVisitIds)
-						: null,
-				authorId: null,
-				title: t.title,
-				body: t.body
-			});
-		}
-	}
+  const rows: Array<typeof schema.medicalNotes.$inferInsert> = [];
 
-	await insertInChunks(rows, part =>
-		db.insert(schema.medicalNotes).values(part).onConflictDoNothing()
-	);
-	console.log(`   ✔ ${rows.length} medical notes ensured`);
-}
+  for (const [patientId, patientVisitIds] of visitIdsByPatient) {
+    if (rand() > 0.3) {
+      continue;
+    }
+
+    const n = 1 + Math.floor(rand() * 2);
+
+    for (let i = 0; i < n; i += 1) {
+      const t = pick(NOTE_TEMPLATES);
+      rows.push({
+        id: stableId(`note:${patientId}:${t.title}:${i}`),
+        patientId,
+        visitId:
+          patientVisitIds.length > 0 && rand() < 0.7
+            ? pick(patientVisitIds)
+            : null,
+        authorId: null,
+        title: t.title,
+        body: t.body,
+      });
+    }
+  }
+
+  await insertInChunks(rows, async (part) => {
+    await db.insert(schema.medicalNotes).values(part).onConflictDoNothing();
+  });
+  console.log(`   ✔ ${rows.length} medical notes ensured`);
+};
 
 // ---------------------------------------------------------------------------
 // Entrypoint
 // ---------------------------------------------------------------------------
 
 export async function runSeed() {
-	await seedLms();
-	await seedClinics();
-	await seedCatalogs();
-	await seedUsers();
-	await seedFormulary();
-	await seedWhoGrowthStandards();
+  await seedLms();
+  await seedClinics();
+  await seedCatalogs();
+  await seedUsers();
+  await seedFormulary();
+  await seedWhoGrowthStandards();
 
-	const {
-		patients,
-		visitIds,
-		visitIdsByPatient,
-		patientIdByVisitId,
-		visitedAtByVisitId
-	} = await seedPatients();
+  const {
+    patients,
+    visitIds,
+    visitIdsByPatient,
+    patientIdByVisitId,
+    visitedAtByVisitId,
+  } = await seedPatients();
 
-	await seedAppointments(patients);
-	await seedMilestones(patients);
-	await seedCertificates(patients);
-	await seedImmunizations(patients);
-	await seedDiagnoses(visitIds);
-	await seedPrescriptions(visitIds, patientIdByVisitId, visitedAtByVisitId);
-	await seedMedicalNotes(visitIdsByPatient);
+  await seedAppointments(patients);
+  await seedMilestones(patients);
+  await seedCertificates(patients);
+  await seedImmunizations(patients);
+  await seedDiagnoses(visitIds);
+  await seedPrescriptions(visitIds, patientIdByVisitId, visitedAtByVisitId);
+  await seedMedicalNotes(visitIdsByPatient);
 
-	console.log("\n✅ PostgreSQL database seeding complete.");
+  console.log('\n✅ PostgreSQL database seeding complete.');
 }
 
+const runSeedCli = async (): Promise<void> => {
+  try {
+    await runSeed();
+  } catch (error: unknown) {
+    console.error('❌ Seeding failed:', error);
+    process.exitCode = 1;
+  } finally {
+    await closeDb();
+  }
+};
+
 if (import.meta.main) {
-	runSeed()
-		.catch(err => {
-			console.error("❌ Seeding failed:", err);
-			process.exitCode = 1;
-		})
-		.finally(async () => {
-			await closeDb();
-		});
+  runSeedCli().catch(() => null);
 }

@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "better-auth": {
+      "type": "http",
+      "url": "https://mcp.inkeep.com/better-auth/mcp",
+      "tools": ["*"]
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "tools": ["*"]
+    },
+    "shadcn": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "shadcn@latest", "mcp"],
+      "tools": ["*"]
+    },
+    "fallow": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["--no", "fallow-mcp"]
+    }
+  }
+}

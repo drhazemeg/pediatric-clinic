@@ -1,2 +1,3 @@
-export * from "./composer.schema";
-export * from "./schema";
+export * from './composer.schema';
+
+export * from './schema';

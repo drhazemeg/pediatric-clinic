@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Canonical role vocabulary.
@@ -10,25 +10,27 @@ import { z } from "zod";
  * `UserRole`/`Role` would stop being assignable to each other.
  */
 export const USER_ROLES = [
-	"admin",
-	"doctor",
-	"staff",
-	"guardian",
-	"patient"
+  'admin',
+  'doctor',
+  'staff',
+  'guardian',
+  'patient',
 ] as const;
 
 export const userRoleSchema = z.enum(USER_ROLES);
+
 export type Role = z.infer<typeof userRoleSchema>;
 
 export const rolesMapSchema = z.record(z.string(), userRoleSchema);
+
 export type RolesMap = z.infer<typeof rolesMapSchema>;
 
 export const ROLES_MAP = {
-	ADMIN: "admin",
-	DOCTOR: "doctor",
-	STAFF: "staff",
-	GUARDIAN: "guardian",
-	PATIENT: "patient"
+  ADMIN: 'admin',
+  DOCTOR: 'doctor',
+  STAFF: 'staff',
+  GUARDIAN: 'guardian',
+  PATIENT: 'patient',
 } as const satisfies RolesMap;
 // export const DEFAULT_ROLE: Role = "doctor";
 // export const ADMIN_ROLES: Role[] = ["admin"];

@@ -1,2 +1,3 @@
-export * from "./formulary";
-export * from "./types";
+export * from './formulary';
+
+export type * from './types';

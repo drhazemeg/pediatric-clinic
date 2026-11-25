@@ -31,4 +31,4 @@ export const THEME_INIT_SCRIPT = `
 		e.style.colorScheme = resolved;
 	} catch (err) {}
 })();
-`.replace(/\n\s*/g, "");
+`.replaceAll(/\n\s*/gu, '');

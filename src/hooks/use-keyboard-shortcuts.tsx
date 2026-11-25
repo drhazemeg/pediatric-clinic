@@ -1,48 +1,50 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 export interface KeyCombination {
-	keys: {
-		ctrlKey?: boolean;
-		metaKey?: boolean;
-		shiftKey?: boolean;
-		altKey?: boolean;
-	};
-	key: string;
-	handler: (event: KeyboardEvent) => void;
-	/** Whether to automatically call event.preventDefault() when the shortcut matches. Defaults to true. */
-	preventDefault?: boolean;
+  keys: {
+    ctrlKey?: boolean;
+    metaKey?: boolean;
+    shiftKey?: boolean;
+    altKey?: boolean;
+  };
+  key: string;
+  handler: (event: KeyboardEvent) => void;
+  /** Whether to automatically call event.preventDefault() when the shortcut matches. Defaults to true. */
+  preventDefault?: boolean;
 }
 
-export function useKeyboardShortcuts(combinations: KeyCombination[]) {
-	useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			combinations.forEach(combo => {
-				const {
-					keys: { ctrlKey, metaKey, shiftKey, altKey },
-					key,
-					handler
-				} = combo;
-				const isMatch =
-					(ctrlKey === undefined || event.ctrlKey === ctrlKey) &&
-					(metaKey === undefined || event.metaKey === metaKey) &&
-					(shiftKey === undefined || event.shiftKey === shiftKey) &&
-					(altKey === undefined || event.altKey === altKey) &&
-					event.key.toLowerCase() === key.toLowerCase();
+export function useKeyboardShortcuts(combinations: Array<KeyCombination>) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      for (const combo of combinations) {
+        const {
+          keys: { ctrlKey, metaKey, shiftKey, altKey },
+          key,
+          handler,
+        } = combo;
 
-				if (isMatch) {
-					if (combo.preventDefault !== false) {
-						event.preventDefault();
-					}
-					handler(event);
-				}
-			});
-		};
+        const isMatch =
+          (ctrlKey === undefined || event.ctrlKey === ctrlKey) &&
+          (metaKey === undefined || event.metaKey === metaKey) &&
+          (shiftKey === undefined || event.shiftKey === shiftKey) &&
+          (altKey === undefined || event.altKey === altKey) &&
+          event.key.toLowerCase() === key.toLowerCase();
 
-		globalThis.addEventListener("keydown", handleKeyDown);
+        if (isMatch) {
+          if (combo.preventDefault !== false) {
+            event.preventDefault();
+          }
 
-		// Cleanup event listener on unmount
-		return () => {
-			globalThis.removeEventListener("keydown", handleKeyDown);
-		};
-	}, [combinations]);
+          handler(event);
+        }
+      }
+    };
+
+    globalThis.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup event listener on unmount
+    return () => {
+      globalThis.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [combinations]);
 }

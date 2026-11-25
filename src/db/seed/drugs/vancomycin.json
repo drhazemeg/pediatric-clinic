@@ -1,148 +1,148 @@
 {
-	"adjustments": [],
-	"administration": "IV infusion over 60-120 min",
-	"cautions": ["Rapid infusion may cause red-man syndrome"],
-	"class": "glycopeptide antibiotic",
-	"concentrations": ["5 mg/ml"],
-	"dilution": {
-		"finalConcMgPerMl": 5,
-		"instruction": "500 mg + 10 ml SWFI → then 1 ml + 9 ml D5W/NS/D10W. Stable 4 days refrigerated, 63 days after further dilution.",
-		"maxConcMgPerMl": 10
-	},
-	"dosing": [
-		{
-			"axes": ["PMA_weeks", "PNA_days"],
-			"doseUnit": "mg/kg/dose",
-			"indication": "General",
-			"table": [
-				{
-					"dosePerKg": 15,
-					"intervalHours": 18,
-					"pmaWeeks": {
-						"max": 29,
-						"maxInclusive": true,
-						"min": 0
-					},
-					"pnaDays": {
-						"max": 14,
-						"min": 0
-					}
-				},
-				{
-					"dosePerKg": 15,
-					"intervalHours": 12,
-					"pmaWeeks": {
-						"max": 29,
-						"maxInclusive": true,
-						"min": 0
-					},
-					"pnaDays": {
-						"max": 999,
-						"min": 15
-					}
-				},
-				{
-					"dosePerKg": 15,
-					"intervalHours": 12,
-					"pmaWeeks": {
-						"max": 36,
-						"maxInclusive": true,
-						"min": 30
-					},
-					"pnaDays": {
-						"max": 14,
-						"min": 0
-					}
-				},
-				{
-					"dosePerKg": 15,
-					"intervalHours": 8,
-					"pmaWeeks": {
-						"max": 36,
-						"maxInclusive": true,
-						"min": 30
-					},
-					"pnaDays": {
-						"max": 999,
-						"min": 15
-					}
-				},
-				{
-					"dosePerKg": 15,
-					"intervalHours": 12,
-					"pmaWeeks": {
-						"max": 44,
-						"maxInclusive": true,
-						"min": 37
-					},
-					"pnaDays": {
-						"max": 7,
-						"min": 0
-					}
-				},
-				{
-					"dosePerKg": 15,
-					"intervalHours": 8,
-					"pmaWeeks": {
-						"max": 44,
-						"maxInclusive": true,
-						"min": 37
-					},
-					"pnaDays": {
-						"max": 999,
-						"min": 8
-					}
-				},
-				{
-					"dosePerKg": 15,
-					"intervalHours": 6,
-					"pmaWeeks": {
-						"max": 99,
-						"maxInclusive": true,
-						"min": 45
-					},
-					"pnaDays": {
-						"max": 999,
-						"min": 0
-					}
-				}
-			],
-			"type": "matrix"
-		},
-		{
-			"axes": ["PNA_days"],
-			"doseUnit": "mg/kg/day",
-			"indication": "Meningitis (PNA ≤7d & ≥2kg)",
-			"table": [
-				{
-					"dosePerKg": 25,
-					"intervalHours": 12,
-					"pnaDays": {
-						"max": 7,
-						"min": 0
-					}
-				},
-				{
-					"dosePerKg": 40,
-					"intervalHours": 8,
-					"pnaDays": {
-						"max": 999,
-						"min": 8
-					}
-				}
-			],
-			"type": "matrix"
-		}
-	],
-	"id": "vancomycin",
-	"lastUpdated": "2019-04-27",
-	"maxDose": {
-		"per": "day",
-		"unit": "mg",
-		"value": 2000
-	},
-	"monitoring": ["Serum trough levels", "Renal function"],
-	"name": "Vancomycin",
-	"references": ["Micromedex Neofax", "Lexicomp"],
-	"routes": ["IV"]
+  "adjustments": [],
+  "administration": "IV infusion over 60-120 min",
+  "cautions": ["Rapid infusion may cause red-man syndrome"],
+  "class": "glycopeptide antibiotic",
+  "concentrations": ["5 mg/ml"],
+  "dilution": {
+    "finalConcMgPerMl": 5,
+    "instruction": "500 mg + 10 ml SWFI → then 1 ml + 9 ml D5W/NS/D10W. Stable 4 days refrigerated, 63 days after further dilution.",
+    "maxConcMgPerMl": 10
+  },
+  "dosing": [
+    {
+      "axes": ["PMA_weeks", "PNA_days"],
+      "doseUnit": "mg/kg/dose",
+      "indication": "General",
+      "table": [
+        {
+          "dosePerKg": 15,
+          "intervalHours": 18,
+          "pmaWeeks": {
+            "max": 29,
+            "maxInclusive": true,
+            "min": 0
+          },
+          "pnaDays": {
+            "max": 14,
+            "min": 0
+          }
+        },
+        {
+          "dosePerKg": 15,
+          "intervalHours": 12,
+          "pmaWeeks": {
+            "max": 29,
+            "maxInclusive": true,
+            "min": 0
+          },
+          "pnaDays": {
+            "max": 999,
+            "min": 15
+          }
+        },
+        {
+          "dosePerKg": 15,
+          "intervalHours": 12,
+          "pmaWeeks": {
+            "max": 36,
+            "maxInclusive": true,
+            "min": 30
+          },
+          "pnaDays": {
+            "max": 14,
+            "min": 0
+          }
+        },
+        {
+          "dosePerKg": 15,
+          "intervalHours": 8,
+          "pmaWeeks": {
+            "max": 36,
+            "maxInclusive": true,
+            "min": 30
+          },
+          "pnaDays": {
+            "max": 999,
+            "min": 15
+          }
+        },
+        {
+          "dosePerKg": 15,
+          "intervalHours": 12,
+          "pmaWeeks": {
+            "max": 44,
+            "maxInclusive": true,
+            "min": 37
+          },
+          "pnaDays": {
+            "max": 7,
+            "min": 0
+          }
+        },
+        {
+          "dosePerKg": 15,
+          "intervalHours": 8,
+          "pmaWeeks": {
+            "max": 44,
+            "maxInclusive": true,
+            "min": 37
+          },
+          "pnaDays": {
+            "max": 999,
+            "min": 8
+          }
+        },
+        {
+          "dosePerKg": 15,
+          "intervalHours": 6,
+          "pmaWeeks": {
+            "max": 99,
+            "maxInclusive": true,
+            "min": 45
+          },
+          "pnaDays": {
+            "max": 999,
+            "min": 0
+          }
+        }
+      ],
+      "type": "matrix"
+    },
+    {
+      "axes": ["PNA_days"],
+      "doseUnit": "mg/kg/day",
+      "indication": "Meningitis (PNA ≤7d & ≥2kg)",
+      "table": [
+        {
+          "dosePerKg": 25,
+          "intervalHours": 12,
+          "pnaDays": {
+            "max": 7,
+            "min": 0
+          }
+        },
+        {
+          "dosePerKg": 40,
+          "intervalHours": 8,
+          "pnaDays": {
+            "max": 999,
+            "min": 8
+          }
+        }
+      ],
+      "type": "matrix"
+    }
+  ],
+  "id": "vancomycin",
+  "lastUpdated": "2019-04-27",
+  "maxDose": {
+    "per": "day",
+    "unit": "mg",
+    "value": 2000
+  },
+  "monitoring": ["Serum trough levels", "Renal function"],
+  "name": "Vancomycin",
+  "references": ["Micromedex Neofax", "Lexicomp"],
+  "routes": ["IV"]
 }

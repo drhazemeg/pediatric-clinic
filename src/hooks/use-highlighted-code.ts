@@ -1,74 +1,83 @@
-import * as React from "react";
-import { loadHighlighter } from "@/lib/highlighter";
+import * as React from 'react';
+
+import { loadHighlighter } from '@/lib/highlighter';
 
 export function useHighlightedCode(value: string, language: string) {
-	// A trailing newline would render as an extra empty line.
-	const code = value.endsWith("\n") ? value.slice(0, -1) : value;
-	const [loaded, setLoaded] = React.useState<{
-		language: string;
-		highlighter: Awaited<ReturnType<typeof loadHighlighter>>;
-	} | null>(null);
-	const highlighter = loaded?.language === language ? loaded.highlighter : null;
+  // A trailing newline would render as an extra empty line.
+  const code = value.endsWith('\n') ? value.slice(0, -1) : value;
 
-	React.useEffect(() => {
-		let cancelled = false;
+  const [loaded, setLoaded] = React.useState<{
+    language: string;
+    highlighter: Awaited<ReturnType<typeof loadHighlighter>>;
+  } | null>(null);
 
-		loadHighlighter(language)
-			.then(next => {
-				if (!cancelled) {
-					setLoaded({ language, highlighter: next });
-				}
-			})
-			.catch(() => {});
+  const highlighter = loaded?.language === language ? loaded.highlighter : null;
 
-		return () => {
-			cancelled = true;
-		};
-	}, [language]);
+  React.useEffect(() => {
+    let cancelled = false;
 
-	// The complete lines, highlighted. While the code streams, only the new
-	// lines are tokenized, starting from the grammar state of the last one.
-	const [done, setDone] = React.useState<{
-		highlighter: typeof highlighter;
-		text: string;
-		lines: React.ReactNode[];
-		state?: Parameters<NonNullable<typeof highlighter>["highlight"]>[1];
-	}>({ highlighter: null, text: "", lines: [] });
+    const load = async () => {
+      try {
+        const nextHighlighter = await loadHighlighter(language);
 
-	let next = done;
+        if (!cancelled) {
+          setLoaded({ language, highlighter: nextHighlighter });
+        }
+      } catch {
+        // Ignore highlighter initialization errors
+      }
+    };
 
-	if (next.highlighter !== highlighter || !code.startsWith(next.text)) {
-		next = { highlighter, text: "", lines: [] };
-	}
+    void load();
 
-	const end = code.lastIndexOf("\n") + 1;
+    return () => {
+      cancelled = true;
+    };
+  }, [language]);
 
-	if (highlighter && end > next.text.length) {
-		const result = highlighter.highlight(
-			code.slice(next.text.length, end - 1),
-			next.state
-		);
+  // The complete lines, highlighted. While the code streams, only the new
+  // lines are tokenized, starting from the grammar state of the last one.
+  const [done, setDone] = React.useState<{
+    highlighter: typeof highlighter;
+    text: string;
+    lines: Array<React.ReactNode>;
+    state?: Parameters<NonNullable<typeof highlighter>['highlight']>[1];
+  }>({ highlighter: null, text: '', lines: [] });
 
-		next = {
-			highlighter,
-			text: code.slice(0, end),
-			lines: [...next.lines, ...result.lines],
-			state: result.state
-		};
-	}
+  let next = done;
 
-	if (next !== done) {
-		setDone(next);
-	}
+  if (next.highlighter !== highlighter || !code.startsWith(next.text)) {
+    next = { highlighter, text: '', lines: [] };
+  }
 
-	// The last line is still being written, so it is tokenized on every render.
-	const tail = code.slice(end);
+  const end = code.lastIndexOf('\n') + 1;
 
-	return React.useMemo(() => {
-		if (!highlighter) {
-			return code.split("\n");
-		}
+  if (highlighter !== null && end > next.text.length) {
+    const result = highlighter.highlight(
+      code.slice(next.text.length, end - 1),
+      next.state,
+    );
 
-		return [...next.lines, highlighter.highlight(tail, next.state).lines[0]];
-	}, [code, highlighter, next, tail]);
+    next = {
+      highlighter,
+      text: code.slice(0, end),
+      lines: [...next.lines, ...result.lines],
+      state: result.state,
+    };
+  }
+
+  if (next !== done) {
+    setDone(next);
+  }
+
+  // The last line is still being written, so it is tokenized on every render.
+  const tail = code.slice(end);
+
+  return React.useMemo(() => {
+    if (highlighter === null) {
+      return code.split('\n');
+    }
+
+    return [...next.lines, highlighter.highlight(tail, next.state).lines[0]];
+  }, [code, highlighter, next, tail]);
 }

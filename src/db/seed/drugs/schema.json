@@ -1,350 +1,350 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"definitions": {
-		"ContinuousInfusionDosing": {
-			"properties": {
-				"doseUnit": {
-					"type": "string"
-				},
-				"indication": {
-					"type": "string"
-				},
-				"ratePerKgPerMin": {
-					"properties": {
-						"initial": {
-							"type": "number"
-						},
-						"max": {
-							"type": "number"
-						},
-						"usualMax": {
-							"type": "number"
-						},
-						"usualMin": {
-							"type": "number"
-						}
-					},
-					"type": "object"
-				},
-				"type": {
-					"const": "continuousInfusion"
-				}
-			},
-			"required": ["type", "doseUnit", "ratePerKgPerMin"],
-			"type": "object"
-		},
-		"FormulaDosing": {
-			"properties": {
-				"doseUnit": {
-					"type": "string"
-				},
-				"formula": {
-					"type": "string"
-				},
-				"indication": {
-					"type": "string"
-				},
-				"inputs": {
-					"items": {
-						"type": "string"
-					},
-					"type": "array"
-				},
-				"type": {
-					"const": "formula"
-				}
-			},
-			"required": ["type", "formula", "inputs", "doseUnit"],
-			"type": "object"
-		},
-		"MatrixDosing": {
-			"properties": {
-				"axes": {
-					"items": {
-						"enum": ["PMA_weeks", "PNA_days", "GA_weeks", "weight_g"]
-					},
-					"type": "array"
-				},
-				"doseUnit": {
-					"type": "string"
-				},
-				"indication": {
-					"type": "string"
-				},
-				"table": {
-					"items": {
-						"properties": {
-							"dosePerKg": {
-								"type": "number"
-							},
-							"gaWeeks": {
-								"properties": {
-									"max": {
-										"type": "number"
-									},
-									"min": {
-										"type": "number"
-									}
-								},
-								"type": "object"
-							},
-							"intervalHours": {
-								"type": "number"
-							},
-							"note": {
-								"type": "string"
-							},
-							"pmaWeeks": {
-								"properties": {
-									"max": {
-										"type": "number"
-									},
-									"maxInclusive": {
-										"type": "boolean"
-									},
-									"min": {
-										"type": "number"
-									}
-								},
-								"type": "object"
-							},
-							"pnaDays": {
-								"properties": {
-									"max": {
-										"type": "number"
-									},
-									"maxInclusive": {
-										"type": "boolean"
-									},
-									"min": {
-										"type": "number"
-									}
-								},
-								"type": "object"
-							},
-							"weightG": {
-								"properties": {
-									"max": {
-										"type": "number"
-									},
-									"min": {
-										"type": "number"
-									}
-								},
-								"type": "object"
-							}
-						},
-						"type": "object"
-					},
-					"type": "array"
-				},
-				"type": {
-					"const": "matrix"
-				}
-			},
-			"required": ["type", "axes", "table", "doseUnit"],
-			"type": "object"
-		},
-		"SimpleDosing": {
-			"properties": {
-				"dosePerKg": {
-					"type": "number"
-				},
-				"doseUnit": {
-					"type": "string"
-				},
-				"indication": {
-					"type": "string"
-				},
-				"intervalHours": {
-					"type": "number"
-				},
-				"type": {
-					"const": "simple"
-				}
-			},
-			"required": ["type", "dosePerKg", "intervalHours"],
-			"type": "object"
-		},
-		"WeightBandDosing": {
-			"properties": {
-				"bands": {
-					"items": {
-						"properties": {
-							"dosePerKg": {
-								"type": "number"
-							},
-							"intervalHours": {
-								"type": "number"
-							},
-							"pnaDays": {
-								"properties": {
-									"max": {
-										"type": "number"
-									},
-									"min": {
-										"type": "number"
-									}
-								},
-								"type": "object"
-							},
-							"weightG": {
-								"properties": {
-									"max": {
-										"type": "number"
-									},
-									"min": {
-										"type": "number"
-									}
-								},
-								"type": "object"
-							}
-						},
-						"type": "object"
-					},
-					"type": "array"
-				},
-				"doseUnit": {
-					"type": "string"
-				},
-				"indication": {
-					"type": "string"
-				},
-				"type": {
-					"const": "weightBand"
-				}
-			},
-			"required": ["type", "bands", "doseUnit"],
-			"type": "object"
-		}
-	},
-	"properties": {
-		"adjustments": {
-			"items": {
-				"properties": {
-					"action": {
-						"type": "string"
-					},
-					"condition": {
-						"type": "string"
-					}
-				},
-				"type": "object"
-			},
-			"type": "array"
-		},
-		"administration": {
-			"type": "string"
-		},
-		"aliases": {
-			"items": {
-				"type": "string"
-			},
-			"type": "array"
-		},
-		"cautions": {
-			"items": {
-				"type": "string"
-			},
-			"type": "array"
-		},
-		"class": {
-			"type": "string"
-		},
-		"concentrations": {
-			"items": {
-				"type": "string"
-			},
-			"type": "array"
-		},
-		"dilution": {
-			"properties": {
-				"finalConcMgPerMl": {
-					"type": "number"
-				},
-				"instruction": {
-					"type": "string"
-				},
-				"maxConcMgPerMl": {
-					"type": "number"
-				},
-				"stability": {
-					"type": "string"
-				}
-			},
-			"type": "object"
-		},
-		"dosing": {
-			"oneOf": [
-				{
-					"$ref": "#/definitions/SimpleDosing"
-				},
-				{
-					"$ref": "#/definitions/MatrixDosing"
-				},
-				{
-					"$ref": "#/definitions/WeightBandDosing"
-				},
-				{
-					"$ref": "#/definitions/ContinuousInfusionDosing"
-				},
-				{
-					"$ref": "#/definitions/FormulaDosing"
-				}
-			]
-		},
-		"id": {
-			"type": "string"
-		},
-		"lastUpdated": {
-			"type": "string"
-		},
-		"maxDose": {
-			"properties": {
-				"per": {
-					"enum": ["dose", "day"]
-				},
-				"unit": {
-					"type": "string"
-				},
-				"value": {
-					"type": "number"
-				}
-			},
-			"type": "object"
-		},
-		"monitoring": {
-			"items": {
-				"type": "string"
-			},
-			"type": "array"
-		},
-		"name": {
-			"type": "string"
-		},
-		"references": {
-			"items": {
-				"type": "string"
-			},
-			"type": "array"
-		},
-		"routes": {
-			"items": {
-				"enum": [
-					"IV",
-					"IM",
-					"IO",
-					"Oral",
-					"ET",
-					"SubQ",
-					"Rectal",
-					"Intratracheal"
-				]
-			},
-			"type": "array"
-		}
-	},
-	"required": ["id", "name", "class", "routes", "dosing", "references"],
-	"title": "NICUDrug",
-	"type": "object"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ContinuousInfusionDosing": {
+      "properties": {
+        "doseUnit": {
+          "type": "string"
+        },
+        "indication": {
+          "type": "string"
+        },
+        "ratePerKgPerMin": {
+          "properties": {
+            "initial": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "usualMax": {
+              "type": "number"
+            },
+            "usualMin": {
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "type": {
+          "const": "continuousInfusion"
+        }
+      },
+      "required": ["type", "doseUnit", "ratePerKgPerMin"],
+      "type": "object"
+    },
+    "FormulaDosing": {
+      "properties": {
+        "doseUnit": {
+          "type": "string"
+        },
+        "formula": {
+          "type": "string"
+        },
+        "indication": {
+          "type": "string"
+        },
+        "inputs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "const": "formula"
+        }
+      },
+      "required": ["type", "formula", "inputs", "doseUnit"],
+      "type": "object"
+    },
+    "MatrixDosing": {
+      "properties": {
+        "axes": {
+          "items": {
+            "enum": ["PMA_weeks", "PNA_days", "GA_weeks", "weight_g"]
+          },
+          "type": "array"
+        },
+        "doseUnit": {
+          "type": "string"
+        },
+        "indication": {
+          "type": "string"
+        },
+        "table": {
+          "items": {
+            "properties": {
+              "dosePerKg": {
+                "type": "number"
+              },
+              "gaWeeks": {
+                "properties": {
+                  "max": {
+                    "type": "number"
+                  },
+                  "min": {
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              },
+              "intervalHours": {
+                "type": "number"
+              },
+              "note": {
+                "type": "string"
+              },
+              "pmaWeeks": {
+                "properties": {
+                  "max": {
+                    "type": "number"
+                  },
+                  "maxInclusive": {
+                    "type": "boolean"
+                  },
+                  "min": {
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              },
+              "pnaDays": {
+                "properties": {
+                  "max": {
+                    "type": "number"
+                  },
+                  "maxInclusive": {
+                    "type": "boolean"
+                  },
+                  "min": {
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              },
+              "weightG": {
+                "properties": {
+                  "max": {
+                    "type": "number"
+                  },
+                  "min": {
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "type": {
+          "const": "matrix"
+        }
+      },
+      "required": ["type", "axes", "table", "doseUnit"],
+      "type": "object"
+    },
+    "SimpleDosing": {
+      "properties": {
+        "dosePerKg": {
+          "type": "number"
+        },
+        "doseUnit": {
+          "type": "string"
+        },
+        "indication": {
+          "type": "string"
+        },
+        "intervalHours": {
+          "type": "number"
+        },
+        "type": {
+          "const": "simple"
+        }
+      },
+      "required": ["type", "dosePerKg", "intervalHours"],
+      "type": "object"
+    },
+    "WeightBandDosing": {
+      "properties": {
+        "bands": {
+          "items": {
+            "properties": {
+              "dosePerKg": {
+                "type": "number"
+              },
+              "intervalHours": {
+                "type": "number"
+              },
+              "pnaDays": {
+                "properties": {
+                  "max": {
+                    "type": "number"
+                  },
+                  "min": {
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              },
+              "weightG": {
+                "properties": {
+                  "max": {
+                    "type": "number"
+                  },
+                  "min": {
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "doseUnit": {
+          "type": "string"
+        },
+        "indication": {
+          "type": "string"
+        },
+        "type": {
+          "const": "weightBand"
+        }
+      },
+      "required": ["type", "bands", "doseUnit"],
+      "type": "object"
+    }
+  },
+  "properties": {
+    "adjustments": {
+      "items": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "administration": {
+      "type": "string"
+    },
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cautions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "class": {
+      "type": "string"
+    },
+    "concentrations": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dilution": {
+      "properties": {
+        "finalConcMgPerMl": {
+          "type": "number"
+        },
+        "instruction": {
+          "type": "string"
+        },
+        "maxConcMgPerMl": {
+          "type": "number"
+        },
+        "stability": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "dosing": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/SimpleDosing"
+        },
+        {
+          "$ref": "#/definitions/MatrixDosing"
+        },
+        {
+          "$ref": "#/definitions/WeightBandDosing"
+        },
+        {
+          "$ref": "#/definitions/ContinuousInfusionDosing"
+        },
+        {
+          "$ref": "#/definitions/FormulaDosing"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "lastUpdated": {
+      "type": "string"
+    },
+    "maxDose": {
+      "properties": {
+        "per": {
+          "enum": ["dose", "day"]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "monitoring": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "name": {
+      "type": "string"
+    },
+    "references": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "routes": {
+      "items": {
+        "enum": [
+          "IV",
+          "IM",
+          "IO",
+          "Oral",
+          "ET",
+          "SubQ",
+          "Rectal",
+          "Intratracheal"
+        ]
+      },
+      "type": "array"
+    }
+  },
+  "required": ["id", "name", "class", "routes", "dosing", "references"],
+  "title": "NICUDrug",
+  "type": "object"
 }

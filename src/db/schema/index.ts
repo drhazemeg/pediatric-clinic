@@ -1,24 +1,31 @@
-export * from "./admin";
-export * from "./auth";
-export * from "./clinic";
-export * from "./columns";
-export * from "./enums";
-export * from "./finance";
-export * from "./growth";
-export * from "./prescriptions";
+import * as adminSchema from './admin';
+import * as authSchema from './auth';
+import * as clinicSchema from './clinic';
+import * as financeSchema from './finance';
+import * as growthSchema from './growth';
+import * as prescriptionsSchema from './prescriptions';
 
-import * as admin from "./admin";
-import * as auth from "./auth";
-import * as clinic from "./clinic";
-import * as finance from "./finance";
-import * as growth from "./growth";
-import * as prescriptions from "./prescriptions";
+export * from './admin';
+
+export * from './auth';
+
+export * from './clinic';
+
+export * from './columns';
+
+export * from './enums';
+
+export * from './finance';
+
+export * from './growth';
+
+export * from './prescriptions';
 
 export const schema = {
-	...admin,
-	...auth,
-	...clinic,
-	...finance,
-	...growth,
-	...prescriptions
+  ...adminSchema,
+  ...authSchema,
+  ...clinicSchema,
+  ...financeSchema,
+  ...growthSchema,
+  ...prescriptionsSchema,
 };

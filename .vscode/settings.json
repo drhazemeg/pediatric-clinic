@@ -1,440 +1,493 @@
 {
-	"[css]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[javascript]": {
-		"editor.defaultFormatter": "biomejs.biome",
-		"js/ts.format.enabled": true
-	},
-	"[javascriptreact]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[json]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[jsonc]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[less]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[markdown]": {
-		"editor.wordWrap": "off"
-	},
-	"[scss]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[tailwindcss]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[typescript]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[typescriptreact]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[yaml]": {
-		"editor.insertSpaces": true,
-		"editor.tabSize": 2
-	},
-	"biome.enabled": true,
-	"biome.requireConfiguration": true,
-	"biome.suggestInstallingGlobally": false,
-	// ===== Breadcrumbs =====
-	"breadcrumbs.enabled": true,
-	"breadcrumbs.filePath": "on",
-	"breadcrumbs.symbolPath": "on",
-	"css.format.enable": true,
-	"debug.internalConsoleOptions": "openOnSessionStart",
-	"debug.onTaskErrors": "showErrors",
-	// ===== Security =====
-	// ===== Debugging =====
-	"debug.openDebug": "openOnDebugBreak",
-	"diffEditor.ignoreTrimWhitespace": true,
-	"diffEditor.renderSideBySide": true,
-	"diffEditor.wordWrap": "on",
-	// ===== Breadcrumbs =====
-	"editor.acceptSuggestionOnCommitCharacter": true,
-	"editor.acceptSuggestionOnEnter": "on",
-	"editor.bracketPairColorization.enabled": true,
-	"editor.codeActionsOnSave": {
-		"source.fixAll": "explicit",
-		"source.fixAll.biome": "explicit",
-		"source.removeUnusedImports": "explicit",
-		"source.sort.json": "explicit"
-	},
-	"editor.codeLens": false,
-	"editor.colorDecorators": false,
-	"editor.cursorBlinking": "phase",
-	"editor.defaultFormatter": "biomejs.biome",
-	"editor.detectIndentation": true,
-	"editor.dragAndDrop": true,
-	"editor.find.autoFindInSelection": "multiline",
-	// ===== Diff Editor =====
-	"editor.folding": true,
-	"editor.foldingStrategy": "auto",
-	"editor.fontFamily": "'JetBrains Mono', 'Fira Code', monospace",
-	"editor.fontLigatures": true,
-	"editor.fontSize": 14,
-	"editor.formatOnPaste": false,
-	// ===== Editor Settings =====
-	"editor.formatOnSave": true,
-	"editor.formatOnSaveMode": "file",
-	"editor.formatOnType": false,
-	"editor.glyphMargin": true,
-	"editor.guides.bracketPairs": true,
-	"editor.guides.indentation": true,
-	"editor.hideCursorInOverviewRuler": false,
-	"editor.hover.enabled": "on",
-	"editor.hover.sticky": true,
-	"editor.inlayHints.enabled": "on",
-	"editor.inlineSuggest.enabled": true,
-	"editor.insertSpaces": true,
-	"editor.largeFileOptimizations": true,
-	// Remove the conflicting comment block about oxc, OR disable biome:
-	// "biome.enabled": false,
-	// "oxc.enable": true,
-	// ===== Editor: make quick-fix visible =====
-	"editor.lightbulb.enabled": "on",
-	"editor.lineHeight": 1.6,
-	"editor.lineNumbers": "on",
-	"editor.linkedEditing": true,
-	"editor.maxTokenizationLineLength": 20000,
-	"editor.minimap.enabled": false,
-	"editor.occurrencesHighlight": "singleFile",
-	"editor.overviewRulerBorder": false,
-	"editor.parameterHints.enabled": true,
-	"editor.quickSuggestions": {
-		"comments": "on",
-		"other": "on",
-		"strings": "on"
-	},
-	// ===== Quick Suggestions =====
-	"editor.quickSuggestionsDelay": 50,
-	"editor.renderControlCharacters": true,
-	"editor.renderFinalNewline": "on",
-	"editor.renderLineHighlight": "line",
-	"editor.renderWhitespace": "boundary",
-	"editor.rulers": [80, 100, 120],
-	"editor.scrollbar.horizontal": "auto",
-	"editor.scrollbar.vertical": "auto",
-	"editor.selectionHighlight": true,
-	"editor.semanticHighlighting.enabled": true,
-	"editor.smoothScrolling": true,
-	// ===== Snippets =====
-	"editor.snippetSuggestions": "bottom",
-	"editor.suggest.snippetsPreventQuickSuggestions": true,
-	"editor.suggestOnTriggerCharacters": true,
-	"editor.tabCompletion": "on",
-	"editor.tabSize": 2,
-	"editor.wordBasedSuggestions": "currentDocument",
-	"editor.wordWrap": "off",
-	// ===== Emmet =====
-	"emmet.includeLanguages": {
-		"javascriptreact": "html",
-		"typescriptreact": "html"
-	},
-	"emmet.showExpandedAbbreviation": "always",
-	"emmet.showSuggestionsAsSnippets": true,
-	"emmet.triggerExpansionOnTab": true,
-	"eslint.enable": false,
-	"explorer.autoReveal": true,
-	"explorer.compactFolders": false,
-	// ===== Explorer =====
-	"explorer.confirmDelete": false,
-	"explorer.confirmDragAndDrop": false,
-	"explorer.fileNesting.enabled": true,
-	"explorer.fileNesting.patterns": {
-		"package.json": "package-lock.json, bun*, .yarnrc*, yarn*, .editorconfig, .gitattributes, oxfmt*, oxlint*, .oxfmt*, .oxlint*, commitlint.config*, bun.lock",
-		"tsconfig.json": "tsconfig.*.json, env.d.ts",
-		"vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*"
-	},
-	"explorer.incrementalNaming": "smart",
-	"explorer.sortOrder": "default",
-	"extensions.closeExtensionDetailsOnViewChange": true,
-	// ===== Extensions =====
-	"extensions.ignoreRecommendations": true,
-	// ===== File Associations =====
-	"files.associations": {
-		".env.*": "dotenv",
-		"*.css": "tailwindcss",
-		"*.json": "jsonc",
-		"*.module.css": "tailwindcss",
-		"*.module.scss": "tailwindcss",
-		"*.scss": "tailwindcss"
-	},
-	"files.autoSave": "off",
-	"files.autoSaveDelay": 1000,
-	"files.encoding": "utf8",
-	// use LF line endings
-	"files.eol": "\n",
-	// ===== File Exclusions =====
-	"files.exclude": {
-		"**/.DS_Store": true,
-		"**/.git": true,
-		"**/.output": true,
-		"**/.tanstack": true,
-		"**/dist": true,
-		"**/generated": true,
-		"**/node_modules": true
-	},
-	"files.insertFinalNewline": true,
-	"files.readonlyInclude": {
-		"**/.tanstack/**/*": true,
-		"**/data": true,
-		"**/generated": true,
-		"**/routeTree.gen.ts": true,
-		"bun.lock": true
-	},
-	"files.trimFinalNewlines": true,
-	"files.trimTrailingWhitespace": true,
-	"files.watcherExclude": {
-		"**/.tanstack/**/*": true,
-		"**/data": true,
-		"**/docs": true,
-		"**/generated": true,
-		"**/routeTree.gen.ts": true,
-		"bun.lock": true
-	},
-	// ===== Git =====
-	"git.autofetch": true,
-	"git.autorefresh": true,
-	"git.confirmSync": false,
-	"git.enableSmartCommit": true,
-	"git.inputValidation": true,
-	"git.inputValidationLength": 72,
-	"git.inputValidationSubjectLength": 50,
-	"git.mergeEditor": true,
-	"js/ts.autoClosingTags.enabled": true,
-	"js/ts.experimental.useTsgo": true,
-	"js/ts.format.enabled": true,
-	"js/ts.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
-	"js/ts.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": false,
-	"js/ts.implicitProjectConfig.experimentalDecorators": true,
-	"js/ts.locale": "en",
-	"js/ts.preferences.autoImportFileExcludePatterns": [
-		"**/dist/**",
-		"**/generated/**",
-		"**/data/**",
-		"**/docs/**"
-	],
-	// ===== TypeScript/JavaScript =====
-	"js/ts.preferences.importModuleSpecifier": "shortest",
-	"js/ts.preferences.importModuleSpecifierEnding": "minimal",
-	"js/ts.preferences.organizeImports": {
-		"sortImportDeclarations": true,
-		"sortImportMembers": true,
-		"sortImportSpecifiers": true
-	},
-	"js/ts.preferences.quoteStyle": "single",
-	"js/ts.preferGoToSourceDefinition": true,
-	// ===== Notifications =====
-	"js/ts.server.showFailedResponses": "auto",
-	"js/ts.suggest.autoImports": true,
-	"js/ts.suggest.completeFunctionCalls": true,
-	"js/ts.tsc.autoDetect": "on",
-	"js/ts.tsdk.path": "node_modules/typescript",
-	"js/ts.tsdk.promptToUseWorkspaceVersion": true,
-	"js/ts.tsserver.automaticTypeAcquisition.enabled": false,
-	"js/ts.tsserver.experimental.enableProjectDiagnostics": false,
-	"js/ts.tsserver.log": "off",
-	"js/ts.tsserver.maxMemory": 8192,
-	"js/ts.tsserver.tracing.enabled": false,
-	"js/ts.tsserver.watchOptions": {
-		"fallbackPolling": "dynamicPriorityPolling",
-		"watchDirectory": "useFsEvents",
-		"watchFile": "useFsEvents"
-	},
-	"js/ts.updateImportsOnFileMove.enabled": "always",
-	"json.format.enable": true,
-	// ============================================
-	// JSON
-	// ============================================
-	"json.schemas": [
-		{
-			"fileMatch": ["fhir/*.json"],
-			"url": "https://json.schemastore.org/fhir.schema.json"
-		}
-	],
-	"markdown.preview.breaks": true,
-	"markdown.preview.linkify": true,
-	"markdown.updateLinksOnFileMove.enabled": "always",
-	"outline.problems.enabled": true,
-	"output.smartScroll.enabled": true,
-	"oxc.enable": false,
-	"oxc.enable.oxfmt": false,
-	"oxc.enable.oxlint": false,
-	// enable oxlint + oxfmt
-	// disable prettier, eslint, biome
-	"prettier.enable": false,
-	// ===== Problems =====
-	"problems.autoReveal": true,
-	"problems.defaultViewMode": "tree",
-	"problems.showCurrentInStatus": true,
-	"search.exclude": {
-		"**/.cache": true,
-		"**/.git": true,
-		"**/.next": true,
-		"**/.output": true,
-		"**/.tanstack": true,
-		"**/.tanstack/**/*": true,
-		"**/.turbo": true,
-		"**/.vinxi": true,
-		"**/coverage": true,
-		"**/data": true,
-		"**/dist": true,
-		"**/node_modules": true,
-		"**/routeTree.gen.ts": true,
-		"bun.lock": true,
-		"docs": true
-	},
-	"search.followSymlinks": false,
-	"search.quickOpen.includeHistory": false,
-	"search.smartCase": true,
-	"search.useGlobalIgnoreFiles": true,
-	"search.useIgnoreFiles": true,
-	"sherlock.editorColors": {
-		"error": {
-			"background": "rgba(241, 76, 76, 0.15)",
-			"border": "#F14C4C",
-			"foreground": "#F14C4C"
-		},
-		"info": {
-			"background": "rgba(79, 193, 255, 0.15)",
-			"border": "#4FC1FF",
-			"foreground": "#4FC1FF"
-		}
-	},
-	"sherlock.inlineAnnotations.enabled": true,
-	"sherlock.previewLanguageTag": "ar",
-	"tailwindcss-intellisense.trace.server": "off",
-	"tailwindCSS.classAttributes": [
-		"class",
-		"className",
-		"ngClass",
-		"class:list",
-		"tw",
-		"clsx"
-	],
-	// ============================================
-	// TAILWIND CSS
-	// ============================================
-	"tailwindCSS.classFunctions": [
-		"clsx",
-		"classnames",
-		"cva",
-		"cn",
-		"tw",
-		"tv",
-		"tw\\.[a-z]+"
-	],
-	"tailwindCSS.codeActions": true,
-	"tailwindCSS.colorDecorators": true,
-	"tailwindCSS.emmetCompletions": true,
-	"tailwindCSS.experimental.classRegex": [
-		["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-		["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-		["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
-	],
-	// ===== Tailwind Experimental =====
-	"tailwindCSS.experimental.configFile": {
-		"src/styles.css": "src/**/*.{ts,tsx,js,jsx}"
-	},
-	// ===== Tailwind Experimental =====
-	"tailwindCSS.files.exclude": [
-		"**/.git/**",
-		"**/node_modules/**",
-		"**/.hg/**",
-		"**/.svn/**",
-		"**/.output/**",
-		"**/dist/**",
-		"**/docs/**",
-		"**/data/**",
-		"**/coverage/**"
-	],
-	"tailwindCSS.hovers": true,
-	"tailwindCSS.includeLanguages": {
-		"javascript": "javascript",
-		"javascriptreact": "javascript",
-		"typescript": "javascript",
-		"typescriptreact": "javascript"
-	},
-	// ===== Tailwind CSS IntelliSense =====
-	"tailwindCSS.lint.cssConflict": "warning",
-	"tailwindCSS.lint.deprecatedAtRule": "warning",
-	"tailwindCSS.lint.invalidApply": "error",
-	"tailwindCSS.lint.invalidConfigPath": "error",
-	"tailwindCSS.lint.invalidScreen": "error",
-	"tailwindCSS.lint.invalidTailwindDirective": "error",
-	"tailwindCSS.lint.invalidVariant": "error",
-	"tailwindCSS.lint.recommendedVariantOrder": "warning",
-	"tailwindCSS.lint.suggestCanonicalClasses": "warning",
-	"tailwindCSS.lint.usedBlocklistedClass": "warning",
-	"tailwindCSS.rootFontSize": 16,
-	"tailwindCSS.showPixelEquivalents": true,
-	"tailwindCSS.suggestions": true,
-	"tailwindCSS.validate": true,
-	"terminal.integrated.copyOnSelection": true,
-	"terminal.integrated.cursorBlinking": true,
-	// ===== Telemetry =====
-	"terminal.integrated.cursorStyle": "line",
-	"terminal.integrated.defaultProfile.linux": "zsh",
-	// ===== Terminal =====
-	"terminal.integrated.defaultProfile.osx": "zsh",
-	"terminal.integrated.defaultProfile.windows": "PowerShell",
-	"terminal.integrated.fontFamily": "'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace",
-	"terminal.integrated.fontSize": 14,
-	"terminal.integrated.lineHeight": 1.2,
-	"terminal.integrated.profiles.linux": {
-		"zsh": {
-			"path": "/usr/bin/zsh"
-		}
-	},
-	"terminal.integrated.rightClickBehavior": "selectWord",
-	"terminal.integrated.shellIntegration.enabled": false,
-	"terminal.integrated.shellIntegration.environmentReporting": false,
-	"terminal.integrated.smoothScrolling": true,
-	"terminal.integrated.suggest.enabled": false,
-	"terminal.integrated.suggest.quickSuggestions": {
-		"arguments": "on",
-		"commands": "on",
-		"unknown": "off"
-	},
-	// ===== Testing =====
-	"testing.automaticallyOpenPeekView": "never",
-	// ===== Testing =====
-	"testing.automaticallyOpenTestResults": "openOnTestStart",
-	// ============================================
-	// WINDOW & WORKBENCH
-	// ============================================
-	"window.closeWhenEmpty": false,
-	"window.title": "${dirty}${activeEditorShort}${separator}${rootName}${separator}${profileName}",
-	"workbench.activityBar.location": "default",
-	"workbench.colorTheme": "Visual Studio Light",
-	"workbench.editor.closeOnFileDelete": true,
-	"workbench.editor.enablePreview": true,
-	"workbench.editor.enablePreviewFromQuickOpen": false,
-	// ===== Workbench =====
-	"workbench.editor.highlightModifiedTabs": true,
-	"workbench.editor.openPositioning": "right",
-	"workbench.editor.pinnedTabSizing": "normal",
-	"workbench.editor.tabSizing": "shrink",
-	"workbench.editor.wrapTabs": true,
-	"workbench.iconTheme": "material-icon-theme",
-	"workbench.list.smoothScrolling": false,
-	"workbench.productIconTheme": "Default",
-	"workbench.settings.editor": "json",
-	"workbench.settings.enableNaturalLanguageSearch": false,
-	"workbench.settings.useSplitJSON": false,
-	"workbench.sideBar.location": "left",
-	"workbench.startupEditor": "none",
-	"workbench.tree.indent": 16,
-	"workbench.tree.renderIndentGuides": "always",
-	// ============================================
-	// YAML
-	// ============================================
-	"zenMode.fullScreen": false,
-	// ===== Zen Mode =====
-	"zenMode.hideLineNumbers": false,
-	"zenMode.hideStatusBar": false
+  "[astro]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": false, // we run format via codeActionsOnSave for ordering
+  "editor.formatOnSaveMode": "file",
+  "[css]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[dotenv]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  }, // ADDED
+  "[graphql]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[handlebars]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[ignore]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  }, // ADDED (.gitignore)
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[json5]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[less]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.wordWrap": "off"
+  },
+  "[mdx]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[tailwindcss]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[vue-html]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "biome.enabled": true,
+  "biome.requireConfiguration": true,
+  "biome.suggestInstallingGlobally": false,
+  // ===== Breadcrumbs =====
+  "breadcrumbs.enabled": true,
+  "breadcrumbs.filePath": "on",
+  "breadcrumbs.symbolPath": "on",
+  "css.format.enable": true,
+  "debug.console.fontSize": 13,
+  "debug.internalConsoleOptions": "openOnSessionStart",
+  "debug.onTaskErrors": "showErrors",
+  // ===== Security =====
+  // ===== Debugging =====
+  "debug.openDebug": "openOnDebugBreak",
+  "diffEditor.ignoreTrimWhitespace": true,
+  "diffEditor.renderSideBySide": true,
+  "diffEditor.wordWrap": "on",
+  // ===== Breadcrumbs =====
+  "editor.acceptSuggestionOnCommitCharacter": true,
+  "editor.acceptSuggestionOnEnter": "on",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "explicit",
+    "source.removeUnusedImports": "explicit"
+  },
+  "editor.codeLens": false,
+  "editor.colorDecorators": false,
+  "editor.cursorBlinking": "phase",
+  "editor.detectIndentation": true,
+  "editor.dragAndDrop": true,
+  "editor.find.autoFindInSelection": "multiline",
+  // ===== Diff Editor =====
+  "editor.folding": true,
+  "editor.foldingStrategy": "auto",
+  "editor.fontFamily": "'JetBrains Mono', 'Fira Code', monospace",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 14,
+  "editor.formatOnPaste": true,
+  // ===== Editor Settings =====
+  "editor.formatOnType": false,
+  "editor.glyphMargin": true,
+  "editor.guides.bracketPairs": true,
+  "editor.guides.indentation": true,
+  "editor.hideCursorInOverviewRuler": false,
+  "editor.hover.enabled": "on",
+  "editor.hover.sticky": true,
+  "editor.inlayHints.enabled": "on",
+  "editor.inlineSuggest.enabled": true,
+  "editor.insertSpaces": true,
+  "editor.largeFileOptimizations": true,
+  // Remove the conflicting comment block about oxc, OR disable biome:
+  // "biome.enabled": false,
+  // "oxc.enable": true,
+  // ===== Editor: make quick-fix visible =====
+  "editor.lightbulb.enabled": "on",
+  "editor.lineHeight": 1.6,
+  "editor.lineNumbers": "on",
+  "editor.linkedEditing": true,
+  "editor.maxTokenizationLineLength": 20000,
+  "editor.minimap.enabled": false,
+  "editor.occurrencesHighlight": "singleFile",
+  "editor.overviewRulerBorder": false,
+  "editor.parameterHints.enabled": true,
+  "editor.quickSuggestions": {
+    "comments": "on",
+    "other": "on",
+    "strings": "on"
+  },
+  // ===== Quick Suggestions =====
+  "editor.quickSuggestionsDelay": 50,
+  "editor.renderControlCharacters": true,
+  "editor.renderFinalNewline": "on",
+  "editor.renderLineHighlight": "line",
+  "editor.renderWhitespace": "boundary",
+  "editor.rulers": [80, 100, 120],
+  "editor.scrollbar.horizontal": "auto",
+  "editor.scrollbar.vertical": "auto",
+  "editor.selectionHighlight": true,
+  "editor.semanticHighlighting.enabled": true,
+  "editor.smoothScrolling": true,
+  // ===== Snippets =====
+  "editor.snippetSuggestions": "bottom",
+  "editor.stickyScroll.enabled": true,
+  "editor.suggest.snippetsPreventQuickSuggestions": true,
+  "editor.suggestOnTriggerCharacters": true,
+  "editor.tabCompletion": "on",
+  "editor.tabSize": 2,
+  "editor.wordBasedSuggestions": "currentDocument",
+  "editor.wordWrap": "off",
+  // ===== Emmet =====
+  "emmet.includeLanguages": {
+    "javascriptreact": "html",
+    "typescriptreact": "html"
+  },
+  "emmet.showExpandedAbbreviation": "never",
+  "emmet.showSuggestionsAsSnippets": true,
+  "emmet.triggerExpansionOnTab": true,
+  "eslint.enable": false,
+  "explorer.autoReveal": true,
+  "explorer.compactFolders": false,
+  // ===== Explorer =====
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, bun*, .yarnrc*, yarn*, .editorconfig, .gitattributes, oxfmt*, oxlint*, .oxfmt*, .oxlint*, commitlint.config*, bun.lock",
+    "tsconfig.json": "tsconfig.*.json, env.d.ts",
+    "vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*"
+  },
+  "explorer.incrementalNaming": "smart",
+  "explorer.sortOrder": "default",
+  "extensions.closeExtensionDetailsOnViewChange": true,
+  // ===== Extensions =====
+  "extensions.ignoreRecommendations": true,
+  // ===== File Associations =====
+  "files.associations": {
+    ".env.*": "dotenv",
+    "*.css": "tailwindcss",
+    "*.json": "jsonc",
+    "*.module.css": "tailwindcss",
+    "*.module.scss": "tailwindcss",
+    "*.scss": "tailwindcss"
+  },
+  "files.autoSave": "off",
+  "files.autoSaveDelay": 1000,
+  "files.encoding": "utf8",
+  // use LF line endings
+  "files.eol": "\n",
+  // ===== File Exclusions =====
+  "files.exclude": {
+    "**/.DS_Store": true,
+    "**/.git": true,
+    "**/.output": true,
+    "**/.tanstack": true,
+    "**/dist": true,
+    "**/generated": true,
+    "**/node_modules": true
+  },
+  "files.insertFinalNewline": true,
+  "files.readonlyInclude": {
+    "**/.tanstack/**/*": true,
+    "**/data": true,
+    "**/generated": true,
+    "**/routeTree.gen.ts": true,
+    "bun.lock": true
+  },
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "files.watcherExclude": {
+    "**/.tanstack/**/*": true,
+    "**/data": true,
+    "**/docs": true,
+    "**/generated": true,
+    "**/routeTree.gen.ts": true,
+    "bun.lock": true
+  },
+  // ===== Git =====
+  "git.autofetch": true,
+  "git.autorefresh": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "git.inputValidation": true,
+  "git.inputValidationLength": 72,
+  "git.inputValidationSubjectLength": 50,
+  "git.mergeEditor": true,
+  "js/ts.autoClosingTags.enabled": true,
+  "js/ts.experimental.useTsgo": true,
+  "js/ts.format.enabled": false,
+  "js/ts.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
+  "js/ts.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": false,
+  "js/ts.implicitProjectConfig.experimentalDecorators": true,
+  "js/ts.implicitProjectConfig.target": "ES2024",
+  "js/ts.locale": "en",
+  "js/ts.preferences.autoImportFileExcludePatterns": [
+    "**/dist/**",
+    "**/generated/**",
+    "**/data/**",
+    "**/docs/**"
+  ],
+  // ===== TypeScript/JavaScript =====
+  "js/ts.preferences.importModuleSpecifier": "shortest",
+  "js/ts.preferences.importModuleSpecifierEnding": "minimal",
+  "js/ts.preferences.organizeImports": {
+    "sortImportDeclarations": true,
+    "sortImportMembers": true,
+    "sortImportSpecifiers": true
+  },
+  "js/ts.preferences.preferTypeOnlyAutoImports": false,
+  "js/ts.preferences.quoteStyle": "single",
+  "js/ts.preferGoToSourceDefinition": true,
+  // ===== Notifications =====
+  "js/ts.server.showFailedResponses": "auto",
+  "js/ts.suggest.autoImports": true,
+  "js/ts.suggest.completeFunctionCalls": true,
+  "js/ts.suggest.objectLiteralMethodSnippets.enabled": true,
+  "js/ts.tsc.autoDetect": "on",
+  "js/ts.tsdk.path": "node_modules/typescript",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.tsserver.automaticTypeAcquisition.enabled": false,
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": false,
+  "js/ts.tsserver.log": "off",
+  "js/ts.tsserver.maxMemory": 8192,
+  "js/ts.tsserver.tracing.enabled": false,
+  "js/ts.tsserver.watchOptions": {
+    "fallbackPolling": "dynamicPriorityPolling",
+    "watchDirectory": "useFsEvents",
+    "watchFile": "useFsEvents"
+  },
+  "js/ts.updateImportsOnFileMove.enabled": "always",
+  // Recommended to keep to avoid silently running the wrong compiler
+  "js/ts.validate.enabled": true,
+  "json.format.enable": true,
+  // ============================================
+  // JSON
+  // ============================================
+  "json.schemas": [
+    {
+      "fileMatch": ["fhir/*.json"],
+      "url": "https://json.schemastore.org/fhir.schema.json"
+    }
+  ],
+  "markdown.preview.breaks": true,
+  "markdown.preview.linkify": true,
+  "markdown.updateLinksOnFileMove.enabled": "always",
+  "npm.scriptRunner": "bun",
+  "outline.problems.enabled": true,
+  "output.smartScroll.enabled": true,
+  "oxc.disableNestedConfig": false,
+  "oxc.enable": false,
+  "oxc.enable.oxfmt": true,
+  "oxc.enable.oxlint": true,
+  "oxc.fmt.configPath": "./oxfmt.config.ts",
+  "oxc.fmt.disableNestedConfig": false,
+  // ─── Oxlint behavior ─────────────────────────────────────────────────
+  "oxc.lint.run": "onType", // faster feedback while typing
+  "oxc.requireConfig": true, // only start the LSP if .oxlintrc.json exists
+  "oxc.tsConfigPath": "./tsconfig.json",
+  "oxc.typeAware": true, // requires oxlint-tsgolint (see §3)
+  "oxc.unusedDisableDirectives": "warn",
+  // enable oxlint + oxfmt
+  // disable prettier, eslint, biome
+  "prettier.enable": false,
+  // ===== Problems =====
+  "problems.autoReveal": true,
+  "problems.defaultViewMode": "tree",
+  "problems.showCurrentInStatus": true,
+  "search.exclude": {
+    "**/.cache": true,
+    "**/.git": true,
+    "**/.next": true,
+    "**/.output": true,
+    "**/.tanstack": true,
+    "**/.tanstack/**/*": true,
+    "**/.turbo": true,
+    "**/.vinxi": true,
+    "**/coverage": true,
+    "**/data": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/routeTree.gen.ts": true,
+    "bun.lock": true,
+    "docs": true
+  },
+  "search.followSymlinks": false,
+  "search.quickOpen.includeHistory": false,
+  "search.smartCase": true,
+  "search.useGlobalIgnoreFiles": true,
+  "search.useIgnoreFiles": true,
+  "sherlock.editorColors": {
+    "error": {
+      "background": "rgba(241, 76, 76, 0.15)",
+      "border": "#F14C4C",
+      "foreground": "#F14C4C"
+    },
+    "info": {
+      "background": "rgba(79, 193, 255, 0.15)",
+      "border": "#4FC1FF",
+      "foreground": "#4FC1FF"
+    }
+  },
+  "sherlock.inlineAnnotations.enabled": true,
+  "sherlock.previewLanguageTag": "ar",
+  "tailwindcss-intellisense.trace.server": "off",
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "ngClass",
+    "class:list",
+    "tw",
+    "clsx"
+  ],
+  // ============================================
+  // TAILWIND CSS
+  // ============================================
+  "tailwindCSS.classFunctions": [
+    "clsx",
+    "classnames",
+    "cva",
+    "cn",
+    "tw",
+    "tv",
+    "tw\\.[a-z]+"
+  ],
+  "tailwindCSS.codeActions": true,
+  "tailwindCSS.colorDecorators": true,
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.experimental.classRegex": [
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  // ===== Tailwind Experimental =====
+  "tailwindCSS.experimental.configFile": {
+    "src/styles.css": "src/**/*.{ts,tsx,js,jsx}"
+  },
+  // ===== Tailwind Experimental =====
+  "tailwindCSS.files.exclude": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/.hg/**",
+    "**/.svn/**",
+    "**/.output/**",
+    "**/dist/**",
+    "**/docs/**",
+    "**/data/**",
+    "**/coverage/**"
+  ],
+  "tailwindCSS.hovers": true,
+  "tailwindCSS.includeLanguages": {
+    "javascript": "javascript",
+    "javascriptreact": "javascript",
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  // ===== Tailwind CSS IntelliSense =====
+  "tailwindCSS.lint.cssConflict": "warning",
+  "tailwindCSS.lint.deprecatedAtRule": "warning",
+  "tailwindCSS.lint.invalidApply": "error",
+  "tailwindCSS.lint.invalidConfigPath": "error",
+  "tailwindCSS.lint.invalidScreen": "error",
+  "tailwindCSS.lint.invalidTailwindDirective": "error",
+  "tailwindCSS.lint.invalidVariant": "error",
+  "tailwindCSS.lint.recommendedVariantOrder": "warning",
+  "tailwindCSS.lint.suggestCanonicalClasses": "warning",
+  "tailwindCSS.lint.usedBlocklistedClass": "warning",
+  "tailwindCSS.rootFontSize": 16,
+  "tailwindCSS.showPixelEquivalents": true,
+  "tailwindCSS.suggestions": true,
+  "tailwindCSS.validate": true,
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.cursorBlinking": true,
+  // ===== Telemetry =====
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  // ===== Terminal =====
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.fontFamily": "'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.lineHeight": 1.2,
+  "terminal.integrated.profiles.linux": {
+    "zsh": {
+      "path": "/usr/bin/zsh"
+    }
+  },
+  "terminal.integrated.rightClickBehavior": "selectWord",
+  "terminal.integrated.shellIntegration.enabled": false,
+  "terminal.integrated.shellIntegration.environmentReporting": false,
+  "terminal.integrated.smoothScrolling": true,
+  "terminal.integrated.suggest.enabled": false,
+  "terminal.integrated.suggest.quickSuggestions": {
+    "arguments": "on",
+    "commands": "on",
+    "unknown": "off"
+  },
+  // ===== Testing =====
+  "testing.automaticallyOpenPeekView": "never",
+  // ===== Testing =====
+  "testing.automaticallyOpenTestResults": "openOnTestStart",
+  // ============================================
+  // WINDOW & WORKBENCH
+  // ============================================
+  "window.closeWhenEmpty": false,
+  "window.title": "${dirty}${activeEditorShort}${separator}${rootName}${separator}${profileName}",
+  "workbench.activityBar.location": "default",
+  "workbench.colorTheme": "Visual Studio Light",
+  "workbench.editor.closeOnFileDelete": true,
+  "workbench.editor.customLabels.enabled": true,
+  "workbench.editor.customLabels.patterns": {
+    "**/src/routes/**/index.tsx": "${dirname}/${filename}.${extname}"
+  },
+  "workbench.editor.enablePreview": true,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  // ===== Workbench =====
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.editor.openPositioning": "right",
+  "workbench.editor.pinnedTabSizing": "normal",
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.editor.wrapTabs": true,
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.list.smoothScrolling": false,
+  "workbench.productIconTheme": "Default",
+  "workbench.settings.editor": "json",
+  "workbench.settings.enableNaturalLanguageSearch": false,
+  "workbench.settings.useSplitJSON": false,
+  "workbench.sideBar.location": "left",
+  "workbench.startupEditor": "none",
+  "workbench.tree.indent": 16,
+  "workbench.tree.renderIndentGuides": "always",
+  // ============================================
+  // YAML
+  // ============================================
+  "zenMode.fullScreen": false,
+  // ===== Zen Mode =====
+  "zenMode.hideLineNumbers": false,
+  "zenMode.hideStatusBar": false
 }

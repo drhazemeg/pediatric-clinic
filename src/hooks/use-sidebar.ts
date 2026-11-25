@@ -1,8 +1,8 @@
 // apps/web/src/hooks/use-sidebar.ts
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from 'react';
 
-const STORAGE_KEY = "smart_clinic_sidebar_collapsed";
+const STORAGE_KEY = 'smart_clinic_sidebar_collapsed';
 const DEFAULT_COLLAPSED = false;
 
 // ── Module-level listener set ──────────────────────────────
@@ -12,59 +12,67 @@ const DEFAULT_COLLAPSED = false;
 // programmatic writes via `setCollapsed` propagate immediately.
 
 type Listener = () => void;
+
 const listeners = new Set<Listener>();
 
-function emit() {
-	for (const l of listeners) l();
-}
+const emit = () => {
+  for (const l of listeners) {
+    l();
+  }
+};
 
-function readStored(): boolean {
-	if (typeof window === "undefined") return DEFAULT_COLLAPSED;
-	try {
-		return window.localStorage.getItem(STORAGE_KEY) === "true";
-	} catch {
-		// localStorage can throw in private-mode / disabled-cookie contexts.
-		return DEFAULT_COLLAPSED;
-	}
-}
+const readStored = (): boolean => {
+  if (typeof window === 'undefined') {
+    return DEFAULT_COLLAPSED;
+  }
 
-function writeStored(value: boolean) {
-	if (typeof window === "undefined") return;
-	try {
-		window.localStorage.setItem(STORAGE_KEY, String(value));
-	} catch {
-		// Ignore quota / security errors — the in-memory listener
-		// set still keeps same-tab instances in sync.
-	}
-}
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) === 'true';
+  } catch {
+    // localStorage can throw in private-mode / disabled-cookie contexts.
+    return DEFAULT_COLLAPSED;
+  }
+};
+
+const writeStored = (value: boolean) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(STORAGE_KEY, String(value));
+  } catch {
+    // Ignore quota / security errors — the in-memory listener
+    // set still keeps same-tab instances in sync.
+  }
+};
 
 // ── Cross-tab sync ─────────────────────────────────────────
 // The `storage` event fires in *other* tabs (not the originating
 // one), so this covers multi-tab drift. Same-tab updates go
 // through `emit()` in `setCollapsed`.
 
-if (typeof window !== "undefined") {
-	window.addEventListener("storage", e => {
-		if (e.key === STORAGE_KEY) emit();
-	});
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEY) {
+      emit();
+    }
+  });
 }
 
 // ── Public store API (usable outside React too) ────────────
 
-function subscribe(callback: Listener) {
-	listeners.add(callback);
-	return () => {
-		listeners.delete(callback);
-	};
-}
+const subscribe = (listener: Listener) => {
+  listeners.add(listener);
 
-function getSnapshot(): boolean {
-	return readStored();
-}
+  return () => {
+    listeners.delete(listener);
+  };
+};
 
-function getServerSnapshot(): boolean {
-	return DEFAULT_COLLAPSED;
-}
+const getSnapshot = (): boolean => readStored();
+
+const getServerSnapshot = (): boolean => DEFAULT_COLLAPSED;
 
 /**
  * Programmatically set the collapsed state. Updates every mounted
@@ -72,40 +80,45 @@ function getServerSnapshot(): boolean {
  * for cross-tab sync.
  */
 export function setSidebarCollapsed(collapsed: boolean): void {
-	const current = readStored();
-	if (current === collapsed) return; // no-op, avoid re-render
-	writeStored(collapsed);
-	emit();
+  const current = readStored();
+
+  // No-op, avoid re-render
+  if (current === collapsed) {
+    return;
+  }
+
+  writeStored(collapsed);
+  emit();
 }
 
 export function toggleSidebarCollapsed(): void {
-	setSidebarCollapsed(!readStored());
+  setSidebarCollapsed(!readStored());
 }
 
 // ── React hook ─────────────────────────────────────────────
 
 export function useSidebar() {
-	const collapsed = useSyncExternalStore(
-		subscribe,
-		getSnapshot,
-		getServerSnapshot
-	);
+  const collapsed = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
 
-	const toggle = useCallback(() => {
-		toggleSidebarCollapsed();
-	}, []);
+  const toggle = useCallback(() => {
+    toggleSidebarCollapsed();
+  }, []);
 
-	const setCollapsed = useCallback((value: boolean) => {
-		setSidebarCollapsed(value);
-	}, []);
+  const setCollapsed = useCallback((value: boolean) => {
+    setSidebarCollapsed(value);
+  }, []);
 
-	const collapse = useCallback(() => {
-		setSidebarCollapsed(true);
-	}, []);
+  const collapse = useCallback(() => {
+    setSidebarCollapsed(true);
+  }, []);
 
-	const expand = useCallback(() => {
-		setSidebarCollapsed(false);
-	}, []);
+  const expand = useCallback(() => {
+    setSidebarCollapsed(false);
+  }, []);
 
-	return { collapsed, toggle, setCollapsed, collapse, expand };
+  return { collapsed, toggle, setCollapsed, collapse, expand };
 }

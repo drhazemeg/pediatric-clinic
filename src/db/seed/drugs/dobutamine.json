@@ -1,32 +1,32 @@
 {
-	"id": "dobutamine",
-	"name": "Dobutamine",
-	"class": "inotrope",
-	"routes": ["IV"],
-	"concentrations": ["12.5 mg/ml (250 mg/20 ml)"],
-	"dosing": {
-		"type": "continuousInfusion",
-		"doseUnit": "mcg/kg/min",
-		"ratePerKgPerMin": {
-			"initial": 0.5,
-			"usualMin": 2,
-			"usualMax": 20,
-			"max": 25
-		}
-	},
-	"dilution": {
-		"instruction": "Dilute to 2000 mcg/ml in neonate: complete to 24 ml with D5W/D10W/NS, infuse over 24 hr. Max conc 4000 mcg/ml.",
-		"finalConcMgPerMl": 2,
-		"maxConcMgPerMl": 4
-	},
-	"administration": "Continuous IV infusion via large vein",
-	"cautions": ["Use large vein to reduce extravasation risk"],
-	"monitoring": [
-		"Continuous heart rate",
-		"Intra-arterial blood pressure",
-		"IV site for extravasation"
-	],
-	"adjustments": [],
-	"references": ["Micromedex Neofax", "Lexicomp"],
-	"lastUpdated": "2019-05-21"
+  "id": "dobutamine",
+  "name": "Dobutamine",
+  "class": "inotrope",
+  "routes": ["IV"],
+  "concentrations": ["12.5 mg/ml (250 mg/20 ml)"],
+  "dosing": {
+    "type": "continuousInfusion",
+    "doseUnit": "mcg/kg/min",
+    "ratePerKgPerMin": {
+      "initial": 0.5,
+      "usualMin": 2,
+      "usualMax": 20,
+      "max": 25
+    }
+  },
+  "dilution": {
+    "instruction": "Dilute to 2000 mcg/ml in neonate: complete to 24 ml with D5W/D10W/NS, infuse over 24 hr. Max conc 4000 mcg/ml.",
+    "finalConcMgPerMl": 2,
+    "maxConcMgPerMl": 4
+  },
+  "administration": "Continuous IV infusion via large vein",
+  "cautions": ["Use large vein to reduce extravasation risk"],
+  "monitoring": [
+    "Continuous heart rate",
+    "Intra-arterial blood pressure",
+    "IV site for extravasation"
+  ],
+  "adjustments": [],
+  "references": ["Micromedex Neofax", "Lexicomp"],
+  "lastUpdated": "2019-05-21"
 }

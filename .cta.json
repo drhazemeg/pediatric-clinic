@@ -1,37 +1,37 @@
 {
-	"bundler": "vite",
-	"projectName": "pediatric-clinic",
-	"mode": "file-router",
-	"typescript": true,
-	"packageManager": "bun",
-	"includeExamples": false,
-	"tailwind": true,
-	"projectPreset": "default",
-	"routerOnly": false,
-	"addOnOptions": {
-		"drizzle": {
-			"database": "postgresql"
-		}
-	},
-	"git": true,
-	"install": true,
-	"intent": true,
-	"version": 1,
-	"framework": "react",
-	"chosenAddOns": [
-		"biome",
-		"nitro",
-		"table",
-		"better-auth",
-		"store",
-		"tanstack-query",
-		"ai",
-		"compiler",
-		"drizzle",
-		"form",
-		"mcp",
-		"shadcn",
-		"t3env",
-		"tRPC"
-	]
+  "bundler": "vite",
+  "projectName": "pediatric-clinic",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "bun",
+  "includeExamples": false,
+  "tailwind": true,
+  "projectPreset": "default",
+  "routerOnly": false,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "postgresql"
+    }
+  },
+  "git": true,
+  "install": true,
+  "intent": true,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "biome",
+    "nitro",
+    "table",
+    "better-auth",
+    "store",
+    "tanstack-query",
+    "ai",
+    "compiler",
+    "drizzle",
+    "form",
+    "mcp",
+    "shadcn",
+    "t3env",
+    "tRPC"
+  ]
 }

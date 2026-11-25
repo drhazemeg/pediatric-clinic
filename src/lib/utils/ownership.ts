@@ -1,34 +1,59 @@
-import { type AnyColumn, eq, type SQL } from "drizzle-orm";
-import { throwForbidden, throwNotFound } from "./errors";
+import type { AnyColumn, SQL } from 'drizzle-orm';
+
+import { eq } from 'drizzle-orm';
+
+import { throwForbidden, throwNotFound } from './errors';
 
 export interface OwnedRow {
-	creatorUserId: string | null | undefined;
+  creatorUserId: string | null | undefined;
 }
 
 type CreatorColumnKey<TTable> = {
-	[K in keyof TTable]: TTable[K] extends AnyColumn ? K : never;
+  [K in keyof TTable]: TTable[K] extends AnyColumn ? K : never;
 }[keyof TTable];
 
-export function assertOwnership(
-	row: OwnedRow | null | undefined,
-	userId: string,
-	resource = "Resource"
-): asserts row is OwnedRow & { creatorUserId: string } {
-	if (!row) {
-		throwNotFound(resource);
-	}
-	if (!userId || !row.creatorUserId || row.creatorUserId !== userId) {
-		throwForbidden();
-	}
-}
+type AssertOwnershipFn = (
+  row: OwnedRow | null | undefined,
+  userId: string,
+  resource?: string,
+) => asserts row is OwnedRow & { creatorUserId: string };
 
-export function ownershipFilter<
-	TTable extends Record<string, unknown>,
-	TKey extends CreatorColumnKey<TTable> & string
->(table: TTable, userId: string, creatorColumn: TKey): SQL {
-	const column = table[creatorColumn];
-	if (!column) {
-		throw new Error(`Invalid ownership column "${String(creatorColumn)}"`);
-	}
-	return eq(column as unknown as AnyColumn, userId);
-}
+const isAnyColumn = (value: unknown): value is AnyColumn =>
+  typeof value === 'object' &&
+  value !== null &&
+  'name' in value &&
+  'dataType' in value;
+
+export const assertOwnership: AssertOwnershipFn = (
+  row,
+  userId,
+  resource = 'Resource',
+) => {
+  if (!row) {
+    throwNotFound(resource);
+  }
+
+  if (
+    userId === '' ||
+    row.creatorUserId === undefined ||
+    row.creatorUserId === null ||
+    row.creatorUserId === '' ||
+    row.creatorUserId !== userId
+  ) {
+    throwForbidden();
+  }
+};
+
+export const ownershipFilter = <TTable extends Record<string, unknown>>(
+  table: TTable,
+  userId: string,
+  creatorColumn: CreatorColumnKey<TTable> & string,
+): SQL => {
+  const column: unknown = table[creatorColumn];
+
+  if (!isAnyColumn(column)) {
+    throw new Error(`Invalid ownership column "${creatorColumn}"`);
+  }
+
+  return eq(column, userId);
+};

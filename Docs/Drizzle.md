@@ -81,12 +81,12 @@ IMPORTANT
 
 You can still use drizzle-zod/valibot/typebox/arktype validation packages but all new update will be added to Drizzle ORM directly
 
--   drizzle-zod -> [drizzle-orm/zod](https://orm.drizzle.team/docs/zod)
--   drizzle-valibot -> [drizzle-orm/valibot](https://orm.drizzle.team/docs/valibot)
--   drizzle-typebox -> [drizzle-orm/typebox-legacy](https://orm.drizzle.team/docs/typebox-legacy) (using @sinclair/typebox)
--   drizzle-typebox -> [drizzle-orm/typebox](https://orm.drizzle.team/docs/typebox) (using typebox)
--   drizzle-arktype -> [drizzle-orm/arktype](https://orm.drizzle.team/docs/arktype)
--   new `drizzle-orm/effect-schema` package added
+- drizzle-zod -> [drizzle-orm/zod](https://orm.drizzle.team/docs/zod)
+- drizzle-valibot -> [drizzle-orm/valibot](https://orm.drizzle.team/docs/valibot)
+- drizzle-typebox -> [drizzle-orm/typebox-legacy](https://orm.drizzle.team/docs/typebox-legacy) (using @sinclair/typebox)
+- drizzle-typebox -> [drizzle-orm/typebox](https://orm.drizzle.team/docs/typebox) (using typebox)
+- drizzle-arktype -> [drizzle-orm/arktype](https://orm.drizzle.team/docs/arktype)
+- new `drizzle-orm/effect-schema` package added
 
 #### `.array()` is no longer chainable[](https://orm.drizzle.team/docs/v0-v1-changes#array-is-no-longer-chainable)
 
@@ -144,9 +144,9 @@ const columns = getColumns(users);
 
 **Linked discussion**: [#2832](https://github.com/drizzle-team/drizzle-orm/discussions/2832)
 
--   No more `journal.json`
--   SQL files and snapshots grouped into separate migration folders
--   `drizzle-kit drop` command removed
+- No more `journal.json`
+- SQL files and snapshots grouped into separate migration folders
+- `drizzle-kit drop` command removed
 
 These changes eliminate potential Git conflicts with the journal file and simplify the process of dropping or fixing conflicted migrations
 
@@ -187,8 +187,8 @@ The `--strict` flag has been removed — its behavior is now the default. `drizz
 
 If you use a coding agent for the upgrade, Drizzle Kit provides two ways to help it work with your project:
 
--   The [Drizzle skill](https://orm.drizzle.team/docs/drizzle-kit-skills) gives your agent guidance on migration workflows, rename decisions and interpreting command results.
--   The [MCP server](https://orm.drizzle.team/docs/drizzle-kit-mcp) lets your agent call your project’s Drizzle Kit to check migration history, generate migrations and read an existing database’s schema.
+- The [Drizzle skill](https://orm.drizzle.team/docs/drizzle-kit-skills) gives your agent guidance on migration workflows, rename decisions and interpreting command results.
+- The [MCP server](https://orm.drizzle.team/docs/drizzle-kit-mcp) lets your agent call your project’s Drizzle Kit to check migration history, generate migrations and read an existing database’s schema.
 
 You can use them together, or use the skill with the CLI. After setup, try:
 
@@ -236,8 +236,8 @@ Note: The Netlify Database driver is developed and maintained by the Netlify tea
 
 #### Effect integration[](https://orm.drizzle.team/docs/v0-v1-changes#effect-integration)
 
--   New **`@effect/sql-pg` driver support**. You can read more [here](https://orm.drizzle.team/docs/connect-effect-postgres)
--   **Effect Schema validation** via `drizzle-orm/effect-schema`. You can read more [here](https://orm.drizzle.team/docs/effect-schema)
+- New **`@effect/sql-pg` driver support**. You can read more [here](https://orm.drizzle.team/docs/connect-effect-postgres)
+- **Effect Schema validation** via `drizzle-orm/effect-schema`. You can read more [here](https://orm.drizzle.team/docs/effect-schema)
 
 Add custom tags to queries. Tags are appended as SQL comments at the end of each query. You can read more [here](https://orm.drizzle.team/docs/sql-comments)
 
@@ -265,10 +265,10 @@ const query = db
 
 The kit has been architecturally redesigned:
 
--   Migrated from database snapshots to DDL snapshots
--   Reworked diff detection and application
--   Schema introspection reduced from ~10s to < 1s
--   Added query hints and explain support for push
+- Migrated from database snapshots to DDL snapshots
+- Reworked diff detection and application
+- Schema introspection reduced from ~10s to < 1s
+- Added query hints and explain support for push
 
 #### `drizzle-kit pull --init`[](https://orm.drizzle.team/docs/v0-v1-changes#drizzle-kit-pull---init)
 
@@ -284,10 +284,10 @@ Detects non-commutative migrations across branches — e.g., two branches alteri
 
 How it works:
 
--   Builds a DAG from snapshot `prevIds` to understand branch structure
--   Finds fork points where branches diverged
--   Computes the DDL diff from parent snapshot to each branch leaf
--   Checks conflicts using a footprint map of which DDL statement types can interfere
+- Builds a DAG from snapshot `prevIds` to understand branch structure
+- Finds fork points where branches diverged
+- Computes the DDL diff from parent snapshot to each branch leaf
+- Checks conflicts using a footprint map of which DDL statement types can interfere
 
 If conflicts are found, the report tells you exactly which migrations on which branches are incompatible
 
@@ -307,8 +307,8 @@ This shows the SQL and migration folders the repair would delete, without changi
 
 The migration table is automatically upgraded when you run `drizzle-kit up`. Two new columns are added:
 
--   **`name`** — the full migration folder name (e.g. `20250220153045_brave_wolverine`)
--   **`applied_at`** — timestamp of when the migration was executed (pre-existing rows are backfilled with `NULL`)
+- **`name`** — the full migration folder name (e.g. `20250220153045_brave_wolverine`)
+- **`applied_at`** — timestamp of when the migration was executed (pre-existing rows are backfilled with `NULL`)
 
 | Column       | Type                     | v0  | v1           |
 | ------------ | ------------------------ | --- | ------------ |
@@ -338,8 +338,8 @@ Top-level `await` is now supported in `drizzle.config.ts` and schema files on No
 
 #### Drizzle-kit: Build system improvements[](https://orm.drizzle.team/docs/v0-v1-changes#drizzle-kit-build-system-improvements)
 
--   Migrated from `esbuild-register` to `tsx` loader — seamless ESM and CJS support
--   Native Bun and Deno launch support
+- Migrated from `esbuild-register` to `tsx` loader — seamless ESM and CJS support
+- Native Bun and Deno launch support
 
 #### TS Schema file processing[](https://orm.drizzle.team/docs/v0-v1-changes#ts-schema-file-processing)
 
@@ -390,8 +390,8 @@ bun add drizzle-kit@rc -D
 
 This guide assumes familiarity with:
 
--   **Relations Fundamentals** - [read here](https://orm.drizzle.team/docs/relations-schema-declaration)
--   **drizzle-kit pull** - [read here](https://orm.drizzle.team/docs/drizzle-kit-pull)
+- **Relations Fundamentals** - [read here](https://orm.drizzle.team/docs/relations-schema-declaration)
+- **drizzle-kit pull** - [read here](https://orm.drizzle.team/docs/drizzle-kit-pull)
 
 ### API changes[](https://orm.drizzle.team/docs/relations-v1-v2#api-changes)
 
@@ -1325,22 +1325,22 @@ jit?: boolean | undefined;
 
 A list of all removed entities
 
--   `Relations`
--   `TableRelationsKeysOnly`
--   `ExtractTableRelationsFromSchema`
--   `ExtractRelationsFromTableExtraConfigSchema`
--   `getOperators`
--   `FindTableByDBName`
--   `RelationalSchemaConfig`
--   `RelationConfig`
--   `extractTablesRelationalConfig`
--   `relations`
--   `createOne`
--   `createMany`
--   `NormalizedRelation`
--   `normalizeRelation`
--   `createTableRelationsHelpers`
--   `TableRelationsHelpers`
+- `Relations`
+- `TableRelationsKeysOnly`
+- `ExtractTableRelationsFromSchema`
+- `ExtractRelationsFromTableExtraConfigSchema`
+- `getOperators`
+- `FindTableByDBName`
+- `RelationalSchemaConfig`
+- `RelationConfig`
+- `extractTablesRelationalConfig`
+- `relations`
+- `createOne`
+- `createMany`
+- `NormalizedRelation`
+- `normalizeRelation`
+- `createTableRelationsHelpers`
+- `TableRelationsHelpers`
 
 4.  In the same manner, `${dialect}-core/query-builders/query` files were updated with RQB v2’s alternatives
 

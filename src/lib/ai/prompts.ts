@@ -1,26 +1,11 @@
-import { formatSafeAge } from "./deidentify";
-import { GenerationError } from "./errors";
-import type { ClinicGenerationInput } from "./schemas";
+import type { ClinicGenerationInput } from './schemas';
+
+import { formatSafeAge } from './deidentify';
+import { GenerationError } from './errors';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Guard: clinical precondition checks before hitting the LLM
 // ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Throws GenerationError when the task cannot be safely completed without
- * a missing clinical parameter. Prevents the model from inventing values.
- */
-function assertRequiredClinicalData(input: ClinicGenerationInput): void {
-	if (input.taskKind === "pediatric_dosing_safety") {
-		const weightKg = resolveWeightKg(input);
-		if (weightKg == null) {
-			throw new GenerationError(
-				"pediatric_dosing_safety requires patient.weightKg (current weight in kg) — refusing to guess from z-scores or birth weight.",
-				{ taskKind: input.taskKind }
-			);
-		}
-	}
-}
 
 /**
  * Resolve current weight in kg from patient record.
@@ -30,21 +15,43 @@ function assertRequiredClinicalData(input: ClinicGenerationInput): void {
  *      (in this schema, `value` for weight-for-age is the z-score, NOT kg —
  *       so we deliberately do NOT fall back to it).
  */
-function resolveWeightKg(input: ClinicGenerationInput): number | null {
-	if (input.patient.weightKg != null && input.patient.weightKg > 0) {
-		return input.patient.weightKg;
-	}
-	return null;
-}
+const resolveWeightKg = (input: ClinicGenerationInput): number | null => {
+  if (
+    input.patient.weightKg !== undefined &&
+    input.patient.weightKg !== null &&
+    input.patient.weightKg > 0
+  ) {
+    return input.patient.weightKg;
+  }
+
+  return null;
+};
+
+/**
+ * Throws GenerationError when the task cannot be safely completed without
+ * a missing clinical parameter. Prevents the model from inventing values.
+ */
+const assertRequiredClinicalData = (input: ClinicGenerationInput): void => {
+  if (input.taskKind === 'pediatric_dosing_safety') {
+    const weightKg = resolveWeightKg(input);
+
+    if (weightKg === null) {
+      throw new GenerationError(
+        'pediatric_dosing_safety requires patient.weightKg (current weight in kg) — refusing to guess from z-scores or birth weight.',
+        { taskKind: input.taskKind },
+      );
+    }
+  }
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // System prompt
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function buildSystemPrompt(input: ClinicGenerationInput): string {
-	const isArabic = input.language === "ar";
+  const isArabic = input.language === 'ar';
 
-	return `You are an expert board-certified Pediatrician and Neonatologist serving as a Clinical Decision Support (CDS) assistant for outpatient pediatric practice.
+  return `You are an expert board-certified Pediatrician and Neonatologist serving as a Clinical Decision Support (CDS) assistant for outpatient pediatric practice.
 You strictly adhere to evidence-based clinical guidelines (Nelson Textbook of Pediatrics, American Academy of Pediatrics [AAP], WHO IMCI, and Egyptian Ministry of Health / Egyptian Pediatric Association standards).
 
 CRITICAL SAFETY & CLINICAL RULES:
@@ -53,7 +60,7 @@ CRITICAL SAFETY & CLINICAL RULES:
 3. Red flags: Always explicitly identify danger signs (e.g. lethargy, poor feeding, respiratory distress/grunting/retractions, cyanosis, dehydration, non-blanching purpuric rash, fever in neonate <28 days).
 4. No autonomous diagnosis: All outputs are recommendations to be evaluated and signed by the licensed pediatrician.
 5. No fabrication: Never invent lab values, vital signs, weights, dates, or physical exam findings that are not present in the patient context. If data is missing, list it in "concerns" or return an empty array — do not fill gaps.
-6. Language: ${isArabic ? "Output all human-facing summaries, home-care instructions, and communication in professional, clear, empathetic Arabic. Clinical terms may include international English abbreviations (e.g. SOAP sections, ICD-10 codes, drug names)." : "Output in clear, precise medical English."}
+6. Language: ${isArabic ? 'Output all human-facing summaries, home-care instructions, and communication in professional, clear, empathetic Arabic. Clinical terms may include international English abbreviations (e.g. SOAP sections, ICD-10 codes, drug names).' : 'Output in clear, precise medical English.'}
 7. Format: You MUST respond ONLY with a valid JSON object matching the requested schema. No markdown code blocks, no extraneous explanatory text before or after the JSON.`;
 }
 
@@ -61,74 +68,91 @@ CRITICAL SAFETY & CLINICAL RULES:
 // Task prompt
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function buildTaskPrompt(input: ClinicGenerationInput): string {
-	// Fail fast if required clinical data is missing.
-	assertRequiredClinicalData(input);
+const textOr = (value: string | null | undefined, fallback: string): string =>
+  value !== undefined && value !== null && value !== '' ? value : fallback;
 
-	const ageDesc = formatSafeAge(input.patient.ageMonths);
+const buildPromptContext = (
+  input: ClinicGenerationInput,
+  ageDesc: string,
+): string => {
+  const patientLines: Array<string> = [
+    `- Sex: ${input.patient.sex}`,
+    `- Age: ${ageDesc}`,
+  ];
 
-	// Build the patient context block
-	const patientLines: string[] = [
-		`- Sex: ${input.patient.sex}`,
-		`- Age: ${ageDesc}`
-	];
-	if (input.patient.weightKg != null) {
-		patientLines.push(`- Current Weight: ${input.patient.weightKg} kg`);
-	}
-	if (input.patient.birthWeightKg != null) {
-		patientLines.push(
-			`- Birth Weight: ${input.patient.birthWeightKg} kg, Gestational Age: ${
-				input.patient.gestationalAgeWeeks ?? "Term"
-			} weeks`
-		);
-	}
-	patientLines.push(
-		`- Documented Allergies: ${input.patient.allergies || "No known allergies"}`
-	);
+  if (input.patient.weightKg !== undefined && input.patient.weightKg !== null) {
+    patientLines.push(`- Current Weight: ${input.patient.weightKg} kg`);
+  }
 
-	let measurementsDesc = "";
-	if (input.measurements && input.measurements.length > 0) {
-		measurementsDesc =
-			"\nMeasurements (z-score reference data, NOT raw values):\n" +
-			input.measurements
-				.map(
-					m =>
-						` - ${m.indicator}: value=${m.value}, z-score=${m.zScore ?? "N/A"}`
-				)
-				.join("\n");
-	}
+  if (
+    input.patient.birthWeightKg !== undefined &&
+    input.patient.birthWeightKg !== null
+  ) {
+    patientLines.push(
+      `- Birth Weight: ${input.patient.birthWeightKg} kg, Gestational Age: ${
+        input.patient.gestationalAgeWeeks ?? 'Term'
+      } weeks`,
+    );
+  }
 
-	let context = `PATIENT CONTEXT:\n${patientLines.join("\n")}${measurementsDesc}`;
+  patientLines.push(
+    `- Documented Allergies: ${textOr(input.patient.allergies, 'No known allergies')}`,
+  );
 
-	if (input.visit) {
-		context += `\n\nVISIT OBSERVATIONS:
-- Chief Complaint: ${input.visit.chiefComplaint || "Unspecified"}
-- Symptoms: ${input.visit.symptoms || "None noted"}
-- Physical Examination: ${input.visit.physicalExam || "None recorded"}
-- Plan / Working Impression: ${input.visit.plan || "None recorded"}
-- Clinician Scratch Notes: ${input.visit.notes || "None"}`;
-	}
+  let measurementsDesc = '';
+  const { measurements } = input;
 
-	if (input.freeText) {
-		context += `\n\nDOCTOR SCRATCHPAD / DICTATION:\n${input.freeText}`;
-	}
+  if (measurements !== undefined && measurements.length > 0) {
+    measurementsDesc = `\nMeasurements (z-score reference data, NOT raw values):\n${measurements
+      .map(
+        (m) =>
+          ` - ${m.indicator}: value=${m.value}, z-score=${m.zScore ?? 'N/A'}`,
+      )
+      .join('\n')}`;
+  }
 
-	if (input.dosingQuery) {
-		context += `\n\nDOSING QUERY TO EVALUATE:
+  let context = `PATIENT CONTEXT:\n${patientLines.join('\n')}${measurementsDesc}`;
+
+  if (input.visit !== undefined) {
+    context += `\n\nVISIT OBSERVATIONS:
+- Chief Complaint: ${textOr(input.visit.chiefComplaint, 'Unspecified')}
+- Symptoms: ${textOr(input.visit.symptoms, 'None noted')}
+- Physical Examination: ${textOr(input.visit.physicalExam, 'None recorded')}
+- Plan / Working Impression: ${textOr(input.visit.plan, 'None recorded')}
+- Clinician Scratch Notes: ${textOr(input.visit.notes, 'None')}`;
+  }
+
+  if (input.freeText !== undefined && input.freeText !== '') {
+    context += `\n\nDOCTOR SCRATCHPAD / DICTATION:\n${input.freeText}`;
+  }
+
+  if (input.dosingQuery !== undefined) {
+    context += `\n\nDOSING QUERY TO EVALUATE:
 - Drug: ${input.dosingQuery.drugName}
 - Proposed Dose: ${input.dosingQuery.proposedDose}
 - Frequency: ${input.dosingQuery.frequency}
-- Route: ${input.dosingQuery.route || "Oral"}
+- Route: ${textOr(input.dosingQuery.route, 'Oral')}
 - Intended Duration: ${
-			input.dosingQuery.durationDays
-				? `${input.dosingQuery.durationDays} days`
-				: "Not specified"
-		}`;
-	}
+      input.dosingQuery.durationDays !== undefined &&
+      input.dosingQuery.durationDays > 0
+        ? `${input.dosingQuery.durationDays} days`
+        : 'Not specified'
+    }`;
+  }
 
-	switch (input.taskKind) {
-		case "soap_note":
-			return `${context}
+  return context;
+};
+
+export function buildTaskPrompt(input: ClinicGenerationInput): string {
+  // Fail fast if required clinical data is missing.
+  assertRequiredClinicalData(input);
+
+  const ageDesc = formatSafeAge(input.patient.ageMonths);
+  const context = buildPromptContext(input, ageDesc);
+
+  switch (input.taskKind) {
+    case 'soap_note': {
+      return `${context}
 
 TASK: Synthesize the observations and notes above into a professional pediatric SOAP note.
 Return JSON with this exact schema:
@@ -149,12 +173,13 @@ Return JSON with this exact schema:
   ],
   "disclaimer": "Clinical decision support advisory only. The treating physician retains sole responsibility for diagnosis and prescribing."
 }`;
+    }
 
-		case "patient_education":
-			return `${context}
+    case 'patient_education': {
+      return `${context}
 
 TASK: Generate bilingual parent/guardian home-care discharge guidance for this child.
-Language: ${input.language === "ar" ? "Arabic" : "English"}.
+Language: ${input.language === 'ar' ? 'Arabic' : 'English'}.
 Return JSON with this exact schema:
 {
   "title": "Clear friendly title, e.g. إرشادات العناية بالطفل: نزلة البرد والتهاب الحلق",
@@ -173,14 +198,16 @@ Return JSON with this exact schema:
     "ظهور طفح جلدي لونه أحمر داكن أو بنفسجي لا يزول بالضغط"
   ],
   "expectedRecoveryTimeline": "e.g. من المتوقع تحسن الأعراض خلال 3 إلى 5 أيام",
-  "language": "${input.language ?? "ar"}",
+  "language": "${input.language ?? 'ar'}",
   "readingLevel": "parents"
 }`;
+    }
 
-		case "pediatric_dosing_safety": {
-			// Guaranteed non-null by assertRequiredClinicalData() above.
-			const weightKg = resolveWeightKg(input);
-			return `${context}
+    case 'pediatric_dosing_safety': {
+      // Guaranteed non-null by assertRequiredClinicalData() above.
+      const weightKg = resolveWeightKg(input);
+
+      return `${context}
 
 TASK: Perform a clinical pharmacology and dosing safety check for the requested drug based on the child's exact current weight (${weightKg} kg) and age (${ageDesc}).
 Use ONLY the weight provided above (${weightKg} kg). Do NOT use any z-score as a weight value.
@@ -202,10 +229,10 @@ Return JSON with this exact schema:
   "clinicalVerdict": "appropriate",
   "disclaimer": "Independent dosing calculation tool. The prescribing physician must verify all doses before administration."
 }`;
-		}
+    }
 
-		case "growth_interpretation":
-			return `${context}
+    case 'growth_interpretation': {
+      return `${context}
 
 TASK: Provide an expert pediatric growth and nutritional evaluation based on the child's age (${ageDesc}) and recorded anthropometric measurements.
 Return JSON with this exact schema:
@@ -225,9 +252,10 @@ Return JSON with this exact schema:
   ],
   "recommendedFollowUpWeeks": 4
 }`;
+    }
 
-		case "differential_dx":
-			return `${context}
+    case 'differential_dx': {
+      return `${context}
 
 TASK: Formulate a prioritized pediatric differential diagnosis list with clinical reasoning.
 Return JSON with this exact schema:
@@ -245,9 +273,10 @@ Return JSON with this exact schema:
   "redFlags": ["Critical pediatric symptoms to monitor"],
   "disclaimer": "Differential suggestions for physician evaluation only."
 }`;
+    }
 
-		case "immunization_advice":
-			return `${context}
+    case 'immunization_advice': {
+      return `${context}
 
 TASK: Evaluate the child's immunization status based on the Egyptian Ministry of Health (MOH) mandatory childhood schedule and provide catch-up guidance.
 Return JSON with this exact schema:
@@ -261,9 +290,10 @@ Return JSON with this exact schema:
   "contraindications": ["e.g. Postpone live vaccines if currently receiving immunosuppressive therapy or severe febrile illness"],
   "notes": "General schedule recommendations and parent advice"
 }`;
+    }
 
-		case "follow_up_questions":
-			return `${context}
+    case 'follow_up_questions': {
+      return `${context}
 
 TASK: Generate a high-yield clinical history checklist of questions the pediatrician should ask the parent to narrow down the differential.
 Return JSON with this exact schema:
@@ -275,5 +305,11 @@ Return JSON with this exact schema:
     }
   ]
 }`;
-	}
+    }
+
+    default: {
+      const _exhaustive: never = input.taskKind;
+      throw new Error(`Unsupported task kind: ${String(_exhaustive)}`);
+    }
+  }
 }

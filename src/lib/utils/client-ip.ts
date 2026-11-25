@@ -12,19 +12,29 @@
  * incoming request has no forwarded headers.
  */
 export function getClientIp(request: Request): string | undefined {
-	const headers = request.headers;
+  const { headers } = request;
 
-	const cfIp = headers.get("cf-connecting-ip");
-	if (cfIp) return cfIp.trim();
+  const cfIp = headers.get('cf-connecting-ip');
 
-	const forwarded = headers.get("x-forwarded-for");
-	if (forwarded) {
-		const firstIp = forwarded.split(",")[0]?.trim();
-		if (firstIp) return firstIp;
-	}
+  if (cfIp !== null && cfIp.trim().length > 0) {
+    return cfIp.trim();
+  }
 
-	const realIp = headers.get("x-real-ip");
-	if (realIp) return realIp.trim();
+  const forwarded = headers.get('x-forwarded-for');
 
-	return undefined;
+  if (forwarded !== null && forwarded.length > 0) {
+    const firstIp = forwarded.split(',').at(0)?.trim();
+
+    if (firstIp !== undefined && firstIp.length > 0) {
+      return firstIp;
+    }
+  }
+
+  const realIp = headers.get('x-real-ip');
+
+  if (realIp !== null && realIp.trim().length > 0) {
+    return realIp.trim();
+  }
+
+  return undefined;
 }

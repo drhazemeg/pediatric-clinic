@@ -5,99 +5,139 @@
 //   @/lib/db            → @/server/db
 //   @/lib/db/schema     → ./schema (patients) / @/server/db/schema (visits, etc.)
 //
-// TODO: clinics: import from `@/features/clinics/schema` once it exists.
+// Clinics: import from `@/features/clinics/schema` once it exists.
 
-import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
+import type {
+  Indicator,
+  LmsRow,
+  LmsTriple,
+  Sex,
+  XAxis,
+} from '@/lib/features/development/index';
+
+import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm';
+
 import {
-	type Indicator,
-	interpolateLms,
-	type LmsRow,
-	type LmsTriple,
-	type Sex,
-	type XAxis,
-	zScoreForValue
-} from "@/lib/features/development/index";
-import { db, lmsReferences, measurements, patients, visits } from "..";
+  interpolateLms,
+  zScoreForValue,
+} from '@/lib/features/development/index';
+
+import { db, lmsReferences, measurements, patients, visits } from '..';
 
 // The DB stores a fifth indicator that has no Egyptian LMS reference.
-type StoredIndicator = Indicator | "head-circumference-for-age";
+type StoredIndicator = Indicator | 'head-circumference-for-age';
 
-export const LMS_VERSION = "egyptian-2021" as const;
+export const LMS_VERSION = 'egyptian-2021' as const;
 
-function toLmsTriple(row: { l: number; m: number; s: number }): LmsTriple {
-	return { l: row.l, m: row.m, s: row.s };
-}
+const toLmsTriple = (row: { l: number; m: number; s: number }): LmsTriple => ({
+  l: row.l,
+  m: row.m,
+  s: row.s,
+});
+
+const getMeasurementVisitContext = async (visitId: string) => {
+  const visit = await db.query.visits.findFirst({
+    where: { id: visitId },
+    columns: {
+      patientId: true,
+      visitedAt: true,
+    },
+  });
+
+  if (visit === undefined) {
+    throw new Error(`Visit ${visitId} was not found`);
+  }
+
+  return { patientId: visit.patientId, measuredAt: visit.visitedAt };
+};
 
 export async function getLmsByAge(
-	indicator: Indicator,
-	sex: Sex,
-	ageMonths: number
+  indicator: Indicator,
+  sex: Sex,
+  ageMonths: number,
 ): Promise<LmsTriple | null> {
-	const where = and(
-		eq(lmsReferences.indicator, indicator),
-		eq(lmsReferences.sex, sex),
-		eq(lmsReferences.xAxis, "age"),
-		eq(lmsReferences.version, LMS_VERSION)
-	);
+  const where = and(
+    eq(lmsReferences.indicator, indicator),
+    eq(lmsReferences.sex, sex),
+    eq(lmsReferences.xAxis, 'age'),
+    eq(lmsReferences.version, LMS_VERSION),
+  );
 
-	const [below] = await db
-		.select()
-		.from(lmsReferences)
-		.where(and(where, lte(lmsReferences.xValue, ageMonths)))
-		.orderBy(desc(lmsReferences.xValue))
-		.limit(1);
+  const belowRows = await db
+    .select()
+    .from(lmsReferences)
+    .where(and(where, lte(lmsReferences.xValue, ageMonths)))
+    .orderBy(desc(lmsReferences.xValue))
+    .limit(1);
 
-	const [above] = await db
-		.select()
-		.from(lmsReferences)
-		.where(and(where, gte(lmsReferences.xValue, ageMonths)))
-		.orderBy(asc(lmsReferences.xValue))
-		.limit(1);
+  const aboveRows = await db
+    .select()
+    .from(lmsReferences)
+    .where(and(where, gte(lmsReferences.xValue, ageMonths)))
+    .orderBy(asc(lmsReferences.xValue))
+    .limit(1);
 
-	if (!below || !above) return null;
-	if (below.xValue === above.xValue) return toLmsTriple(below);
+  const below = belowRows.at(0);
+  const above = aboveRows.at(0);
 
-	const tri = interpolateLms(
-		ageMonths,
-		{ x: below.xValue, l: below.l, m: below.m, s: below.s },
-		{ x: above.xValue, l: above.l, m: above.m, s: above.s }
-	);
-	return tri;
+  if (below === undefined || above === undefined) {
+    return null;
+  }
+
+  if (below.xValue === above.xValue) {
+    return toLmsTriple(below);
+  }
+
+  const tri = interpolateLms(
+    ageMonths,
+    { x: below.xValue, l: below.l, m: below.m, s: below.s },
+    { x: above.xValue, l: above.l, m: above.m, s: above.s },
+  );
+
+  return tri;
 }
 
 export async function getLmsByLength(
-	sex: Sex,
-	lengthCm: number
+  sex: Sex,
+  lengthCm: number,
 ): Promise<LmsTriple | null> {
-	const where = and(
-		eq(lmsReferences.indicator, "weight-for-length"),
-		eq(lmsReferences.sex, sex),
-		eq(lmsReferences.xAxis, "length"),
-		eq(lmsReferences.version, LMS_VERSION)
-	);
+  const where = and(
+    eq(lmsReferences.indicator, 'weight-for-length'),
+    eq(lmsReferences.sex, sex),
+    eq(lmsReferences.xAxis, 'length'),
+    eq(lmsReferences.version, LMS_VERSION),
+  );
 
-	const [below] = await db
-		.select()
-		.from(lmsReferences)
-		.where(and(where, lte(lmsReferences.xValue, lengthCm)))
-		.orderBy(desc(lmsReferences.xValue))
-		.limit(1);
+  const belowRows = await db
+    .select()
+    .from(lmsReferences)
+    .where(and(where, lte(lmsReferences.xValue, lengthCm)))
+    .orderBy(desc(lmsReferences.xValue))
+    .limit(1);
 
-	const [above] = await db
-		.select()
-		.from(lmsReferences)
-		.where(and(where, gte(lmsReferences.xValue, lengthCm)))
-		.orderBy(asc(lmsReferences.xValue))
-		.limit(1);
+  const aboveRows = await db
+    .select()
+    .from(lmsReferences)
+    .where(and(where, gte(lmsReferences.xValue, lengthCm)))
+    .orderBy(asc(lmsReferences.xValue))
+    .limit(1);
 
-	if (!below || !above) return null;
-	if (below.xValue === above.xValue) return toLmsTriple(below);
+  const below = belowRows.at(0);
+  const above = aboveRows.at(0);
 
-	return interpolateLms(
-		lengthCm,
-		{ x: below.xValue, l: below.l, m: below.m, s: below.s },
-		{ x: above.xValue, l: above.l, m: above.m, s: above.s }
-	);
+  if (below === undefined || above === undefined) {
+    return null;
+  }
+
+  if (below.xValue === above.xValue) {
+    return toLmsTriple(below);
+  }
+
+  return interpolateLms(
+    lengthCm,
+    { x: below.xValue, l: below.l, m: below.m, s: below.s },
+    { x: above.xValue, l: above.l, m: above.m, s: above.s },
+  );
 }
 
 // --- Standalone measurement insert (creates a measurement-only visit) -----
@@ -108,179 +148,188 @@ export async function getLmsByLength(
  * `/patients/$patientId/measurements/new` route.
  */
 export async function insertMeasurementsStandalone(input: {
-	patientId: string;
-	clinicId: string;
-	rows: Array<{
-		indicator: Indicator;
-		value: number;
-		lengthCm?: number | null;
-	}>;
+  patientId: string;
+  clinicId: string;
+  rows: Array<{
+    indicator: Indicator;
+    value: number;
+    lengthCm?: number | null;
+  }>;
 }) {
-	const [patient] = await db
-		.select({
-			sex: patients.sex,
-			dateOfBirth: patients.dateOfBirth
-		})
-		.from(patients)
-		.where(eq(patients.id, input.patientId))
-		.limit(1);
+  const patientRows = await db
+    .select({
+      sex: patients.sex,
+      dateOfBirth: patients.dateOfBirth,
+    })
+    .from(patients)
+    .where(eq(patients.id, input.patientId))
+    .limit(1);
 
-	if (!patient) throw new Error("Patient not found");
+  const patient = patientRows.at(0);
 
-	const visitedAt = new Date();
-	const ageMonths =
-		(visitedAt.getTime() - new Date(patient.dateOfBirth).getTime()) /
-		(86_400_000 * 30.4375);
-	const years = Math.floor(ageMonths / 12);
-	const remainder = Math.round(ageMonths - years * 12);
+  if (patient === undefined) {
+    throw new Error('Patient not found');
+  }
 
-	const [visit] = await db
-		.insert(visits)
-		.values({
-			patientId: input.patientId,
-			clinicId: input.clinicId,
-			visitedAt,
-			ageMonths,
-			ageYears: years,
-			ageMonthsRemainder: remainder >= 12 ? 0 : remainder
-		})
-		.returning({ id: visits.id });
+  const visitedAt = new Date();
 
-	if (!visit) throw new Error("Failed to create visit");
+  const ageMonths =
+    (visitedAt.getTime() - new Date(patient.dateOfBirth).getTime()) /
+    (86_400_000 * 30.4375);
 
-	const prepared = await Promise.all(
-		input.rows.map(async row => {
-			const measurement = {
-				visitId: visit.id,
-				patientId: input.patientId,
-				measuredAt: visitedAt,
-				indicator: row.indicator,
-				value: row.value
-			};
-			let lms: LmsTriple | null = null;
-			try {
-				if (row.indicator === "weight-for-length") {
-					if (!row.lengthCm) {
-						return measurement;
-					}
-					lms = await getLmsByLength(patient.sex, row.lengthCm);
-				} else if (row.indicator !== "head-circumference-for-age") {
-					lms = await getLmsByAge(row.indicator, patient.sex, ageMonths);
-				}
-			} catch {
-				return measurement;
-			}
+  const years = Math.floor(ageMonths / 12);
+  const remainder = Math.round(ageMonths - years * 12);
 
-			if (!lms) return measurement;
+  const [visit] = await db
+    .insert(visits)
+    .values({
+      patientId: input.patientId,
+      clinicId: input.clinicId,
+      visitedAt,
+      ageMonths,
+      ageYears: years,
+      ageMonthsRemainder: remainder >= 12 ? 0 : remainder,
+    })
+    .returning({ id: visits.id });
 
-			const zScore = zScoreForValue(lms, row.value);
-			return {
-				...measurement,
-				zScore,
-				lmsL: lms.l,
-				lmsM: lms.m,
-				lmsS: lms.s
-			};
-		})
-	);
+  const prepared = await Promise.all(
+    input.rows.map(async (row) => {
+      const measurement = {
+        visitId: visit.id,
+        patientId: input.patientId,
+        measuredAt: visitedAt,
+        indicator: row.indicator,
+        value: row.value,
+      };
 
-	return db.insert(measurements).values(prepared).returning();
+      let lms: LmsTriple | null = null;
+
+      try {
+        if (row.indicator === 'weight-for-length') {
+          if (
+            row.lengthCm === undefined ||
+            row.lengthCm === null ||
+            row.lengthCm <= 0
+          ) {
+            return measurement;
+          }
+
+          lms = await getLmsByLength(patient.sex, row.lengthCm);
+        } else if (row.indicator !== 'head-circumference-for-age') {
+          lms = await getLmsByAge(row.indicator, patient.sex, ageMonths);
+        }
+      } catch {
+        return measurement;
+      }
+
+      if (lms === null) {
+        return measurement;
+      }
+
+      const zScore = zScoreForValue(lms, row.value);
+
+      return {
+        ...measurement,
+        zScore,
+        lmsL: lms.l,
+        lmsM: lms.m,
+        lmsS: lms.s,
+      };
+    }),
+  );
+
+  return await db.insert(measurements).values(prepared).returning();
 }
 
 // --- Bulk insert into an existing visit ------------------------------------
 
 export async function createMeasurementsForVisit(input: {
-	visitId: string;
-	rows: Array<{
-		indicator: Indicator;
-		value: number;
-		zScore?: number;
-		percentile?: number;
-		classification?: string;
-		lmsL?: number;
-		lmsM?: number;
-		lmsS?: number;
-	}>;
+  visitId: string;
+  rows: Array<{
+    indicator: Indicator;
+    value: number;
+    zScore?: number;
+    percentile?: number;
+    classification?: string;
+    lmsL?: number;
+    lmsM?: number;
+    lmsS?: number;
+  }>;
 }) {
-	if (input.rows.length === 0) return [];
-	const visitContext = await getMeasurementVisitContext(input.visitId);
-	return db
-		.insert(measurements)
-		.values(
-			input.rows.map(r => ({
-				...r,
-				visitId: input.visitId,
-				...visitContext
-			}))
-		)
-		.returning();
-}
-async function getMeasurementVisitContext(visitId: string) {
-	const visit = await db.query.visits.findFirst({
-		where: { id: visitId },
-		columns: {
-			patientId: true,
-			visitedAt: true
-		}
-	});
-	if (!visit) throw new Error(`Visit ${visitId} was not found`);
-	return { patientId: visit.patientId, measuredAt: visit.visitedAt };
+  if (input.rows.length === 0) {
+    return [];
+  }
+
+  const visitContext = await getMeasurementVisitContext(input.visitId);
+
+  return await db
+    .insert(measurements)
+    .values(
+      input.rows.map((r) => ({
+        ...r,
+        visitId: input.visitId,
+        ...visitContext,
+      })),
+    )
+    .returning();
 }
 
 export async function addMeasurementWithZScore(
-	visitId: string,
-	indicator: StoredIndicator,
-	value: number,
-	sex: "male" | "female",
-	ageMonths: number,
-	lengthCm?: number
+  visitId: string,
+  indicator: StoredIndicator,
+  value: number,
+  sex: 'male' | 'female',
+  ageMonths: number,
+  lengthCm?: number,
 ) {
-	if (indicator === "head-circumference-for-age") {
-		throw new Error(
-			"No Egyptian LMS reference data is available for head circumference."
-		);
-	}
+  if (indicator === 'head-circumference-for-age') {
+    throw new Error(
+      'No Egyptian LMS reference data is available for head circumference.',
+    );
+  }
 
-	// 1. Resolve LMS — length-based for WFL, age-based otherwise.
-	const lms: LmsTriple | null =
-		indicator === "weight-for-length"
-			? lengthCm === undefined
-				? null
-				: await getLmsByLength(sex, lengthCm)
-			: await getLmsByAge(indicator, sex, ageMonths);
+  // 1. Resolve LMS — length-based for WFL, age-based otherwise.
+  let lms: LmsTriple | null;
 
-	if (!lms) {
-		throw new Error(
-			indicator === "weight-for-length"
-				? `No LMS reference found for ${indicator}, ${sex}, length ${lengthCm ?? "(required)"}`
-				: `No LMS reference found for ${indicator}, ${sex}, age ${ageMonths}`
-		);
-	}
+  if (indicator === 'weight-for-length') {
+    lms = lengthCm === undefined ? null : await getLmsByLength(sex, lengthCm);
+  } else {
+    lms = await getLmsByAge(indicator, sex, ageMonths);
+  }
 
-	// 2. Z-score. `zScoreForValue` throws `LmsDomainError` on invalid value/LMS,
-	// which is exactly what we want — the old `calculateZScore` returned 0 on
-	// bad input, which silently classified junk as "median".
-	const zScore = zScoreForValue(lms, value);
+  if (lms === null) {
+    throw new Error(
+      indicator === 'weight-for-length'
+        ? `No LMS reference found for ${indicator}, ${sex}, length ${lengthCm ?? '(required)'}`
+        : `No LMS reference found for ${indicator}, ${sex}, age ${ageMonths}`,
+    );
+  }
 
-	// 3. Insert.
-	const visitContext = await getMeasurementVisitContext(visitId);
-	const [newMeasurement] = await db
-		.insert(measurements)
-		.values([
-			{
-				visitId,
-				...visitContext,
-				indicator,
-				value,
-				zScore,
-				lmsL: lms.l,
-				lmsM: lms.m,
-				lmsS: lms.s
-			}
-		])
-		.returning();
+  // 2. Z-score. `zScoreForValue` throws `LmsDomainError` on invalid value/LMS,
+  // which is exactly what we want — the old `calculateZScore` returned 0 on
+  // bad input, which silently classified junk as "median".
+  const zScore = zScoreForValue(lms, value);
 
-	return newMeasurement;
+  // 3. Insert.
+  const visitContext = await getMeasurementVisitContext(visitId);
+
+  const [newMeasurement] = await db
+    .insert(measurements)
+    .values([
+      {
+        visitId,
+        ...visitContext,
+        indicator,
+        value,
+        zScore,
+        lmsL: lms.l,
+        lmsM: lms.m,
+        lmsS: lms.s,
+      },
+    ])
+    .returning();
+
+  return newMeasurement;
 }
 
 // ---------------------------------------------------------------------------
@@ -288,48 +337,53 @@ export async function addMeasurementWithZScore(
 // ---------------------------------------------------------------------------
 
 export async function createMeasurement(input: {
-	visitId: string;
-	patientId: string;
-	indicator: StoredIndicator;
-	value: number;
-	zScore?: number;
-	percentile?: number;
-	classification?: string;
-	lmsL?: number;
-	lmsM?: number;
-	lmsS?: number;
+  visitId: string;
+  patientId: string;
+  indicator: StoredIndicator;
+  value: number;
+  zScore?: number;
+  percentile?: number;
+  classification?: string;
+  lmsL?: number;
+  lmsM?: number;
+  lmsS?: number;
 }) {
-	const visitContext = await getMeasurementVisitContext(input.visitId);
-	const [row] = await db
-		.insert(measurements)
-		.values([{ ...input, ...visitContext }])
-		.returning();
-	return row;
+  const visitContext = await getMeasurementVisitContext(input.visitId);
+
+  const [row] = await db
+    .insert(measurements)
+    .values([{ ...input, ...visitContext }])
+    .returning();
+
+  return row;
 }
 
 /** Bulk insert — useful when saving a full panel at once. */
 export async function createMeasurements(
-	rows: Array<{
-		visitId: string;
-		indicator: StoredIndicator;
-		value: number;
-		zScore?: number;
-		percentile?: number;
-		classification?: string;
-		lmsL?: number;
-		lmsM?: number;
-		lmsS?: number;
-	}>
+  rows: Array<{
+    visitId: string;
+    indicator: StoredIndicator;
+    value: number;
+    zScore?: number;
+    percentile?: number;
+    classification?: string;
+    lmsL?: number;
+    lmsM?: number;
+    lmsS?: number;
+  }>,
 ) {
-	if (rows.length === 0) return [];
+  if (rows.length === 0) {
+    return [];
+  }
 
-	const preparedRows = await Promise.all(
-		rows.map(async row => ({
-			...row,
-			...(await getMeasurementVisitContext(row.visitId))
-		}))
-	);
-	return db.insert(measurements).values(preparedRows).returning();
+  const preparedRows = await Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      ...(await getMeasurementVisitContext(row.visitId)),
+    })),
+  );
+
+  return await db.insert(measurements).values(preparedRows).returning();
 }
 
 // ---------------------------------------------------------------------------
@@ -337,17 +391,17 @@ export async function createMeasurements(
 // ---------------------------------------------------------------------------
 
 export async function getMeasurementById(id: string) {
-	return db.query.measurements.findFirst({
-		where: { id },
-		with: { visit: { with: { patient: true } } }
-	});
+  return await db.query.measurements.findFirst({
+    where: { id },
+    with: { visit: { with: { patient: true } } },
+  });
 }
 
 export async function listMeasurementsForVisit(visitId: string) {
-	return db.query.measurements.findMany({
-		where: { visitId },
-		orderBy: { indicator: "asc" }
-	});
+  return await db.query.measurements.findMany({
+    where: { visitId },
+    orderBy: { indicator: 'asc' },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -370,21 +424,21 @@ export async function listMeasurementsForVisit(visitId: string) {
 
 /** Flagged measurements (|z| ≥ threshold) for a patient. */
 export async function listFlaggedMeasurements(
-	patientId: string,
-	zThreshold = 2
+  patientId: string,
+  zThreshold = 2,
 ) {
-	return db.query.measurements.findMany({
-		where: {
-			visit: { patientId },
-			OR: [{ zScore: { gte: zThreshold } }, { zScore: { lte: -zThreshold } }]
-		},
-		with: {
-			visit: {
-				columns: { visitedAt: true, ageMonths: true }
-			}
-		},
-		orderBy: { id: "desc" }
-	});
+  return await db.query.measurements.findMany({
+    where: {
+      visit: { patientId },
+      OR: [{ zScore: { gte: zThreshold } }, { zScore: { lte: -zThreshold } }],
+    },
+    with: {
+      visit: {
+        columns: { visitedAt: true, ageMonths: true },
+      },
+    },
+    orderBy: { id: 'desc' },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -402,25 +456,28 @@ export async function listFlaggedMeasurements(
  * the patient, not the latest.
  */
 export async function latestMeasurementPerIndicator(patientId: string) {
-	const latestVisit = await db
-		.select({ id: visits.id })
-		.from(visits)
-		.where(eq(visits.patientId, patientId))
-		.orderBy(desc(visits.visitedAt))
-		.limit(1);
+  const latestVisit = await db
+    .select({ id: visits.id })
+    .from(visits)
+    .where(eq(visits.patientId, patientId))
+    .orderBy(desc(visits.visitedAt))
+    .limit(1);
 
-	const visitId = latestVisit[0]?.id;
-	if (!visitId) return [];
+  const visitId = latestVisit.at(0)?.id;
 
-	return db.query.measurements.findMany({
-		where: { visitId },
-		with: {
-			visit: {
-				columns: { visitedAt: true, ageMonths: true }
-			}
-		},
-		orderBy: { indicator: "asc" }
-	});
+  if (visitId === undefined) {
+    return [];
+  }
+
+  return await db.query.measurements.findMany({
+    where: { visitId },
+    with: {
+      visit: {
+        columns: { visitedAt: true, ageMonths: true },
+      },
+    },
+    orderBy: { indicator: 'asc' },
+  });
 }
 
 /**
@@ -430,24 +487,30 @@ export async function latestMeasurementPerIndicator(patientId: string) {
  * readable, and the row count per patient is tiny.
  */
 export async function latestPanelForPatient(patientId: string) {
-	const rows = await db
-		.select({
-			indicator: measurements.indicator,
-			value: measurements.value,
-			zScore: measurements.zScore,
-			percentile: measurements.percentile,
-			classification: measurements.classification,
-			visitedAt: visits.visitedAt,
-			ageMonths: visits.ageMonths
-		})
-		.from(measurements)
-		.innerJoin(visits, eq(measurements.visitId, visits.id))
-		.where(eq(visits.patientId, patientId))
-		.orderBy(desc(visits.visitedAt));
+  const rows = await db
+    .select({
+      indicator: measurements.indicator,
+      value: measurements.value,
+      zScore: measurements.zScore,
+      percentile: measurements.percentile,
+      classification: measurements.classification,
+      visitedAt: visits.visitedAt,
+      ageMonths: visits.ageMonths,
+    })
+    .from(measurements)
+    .innerJoin(visits, eq(measurements.visitId, visits.id))
+    .where(eq(visits.patientId, patientId))
+    .orderBy(desc(visits.visitedAt));
 
-	const seen = new Map<string, (typeof rows)[number]>();
-	for (const r of rows) if (!seen.has(r.indicator)) seen.set(r.indicator, r);
-	return Array.from(seen.values());
+  const seen = new Map<string, (typeof rows)[number]>();
+
+  for (const r of rows) {
+    if (!seen.has(r.indicator)) {
+      seen.set(r.indicator, r);
+    }
+  }
+
+  return [...seen.values()];
 }
 
 // ---------------------------------------------------------------------------
@@ -456,17 +519,17 @@ export async function latestPanelForPatient(patientId: string) {
 
 /** Classification distribution across a clinic — useful for a dashboard. */
 export async function classificationCountsForClinic(clinicId: string) {
-	return db
-		.select({
-			indicator: measurements.indicator,
-			classification: measurements.classification,
-			count: sql<number>`COUNT(*)`
-		})
-		.from(measurements)
-		.innerJoin(visits, eq(measurements.visitId, visits.id))
-		.innerJoin(patients, eq(visits.patientId, patients.id))
-		.where(eq(patients.clinicId, clinicId))
-		.groupBy(measurements.indicator, measurements.classification);
+  return await db
+    .select({
+      indicator: measurements.indicator,
+      classification: measurements.classification,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(measurements)
+    .innerJoin(visits, eq(measurements.visitId, visits.id))
+    .innerJoin(patients, eq(visits.patientId, patients.id))
+    .where(eq(patients.clinicId, clinicId))
+    .groupBy(measurements.indicator, measurements.classification);
 }
 
 // ---------------------------------------------------------------------------
@@ -481,23 +544,23 @@ export async function classificationCountsForClinic(clinicId: string) {
  * matched (the old query returned nothing).
  */
 export async function severeCasesForClinic(clinicId: string) {
-	return db.query.measurements.findMany({
-		where: {
-			visit: { clinicId },
-			OR: [{ zScore: { gte: 3 } }, { zScore: { lte: -3 } }]
-		},
-		with: {
-			visit: {
-				columns: { visitedAt: true, ageMonths: true },
-				with: {
-					patient: {
-						columns: { id: true, mrn: true, firstName: true, lastName: true }
-					}
-				}
-			}
-		},
-		orderBy: { createdAt: "desc" }
-	});
+  return await db.query.measurements.findMany({
+    where: {
+      visit: { clinicId },
+      OR: [{ zScore: { gte: 3 } }, { zScore: { lte: -3 } }],
+    },
+    with: {
+      visit: {
+        columns: { visitedAt: true, ageMonths: true },
+        with: {
+          patient: {
+            columns: { id: true, mrn: true, firstName: true, lastName: true },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -505,27 +568,28 @@ export async function severeCasesForClinic(clinicId: string) {
 // ---------------------------------------------------------------------------
 
 export async function updateMeasurement(
-	id: string,
-	patch: Partial<{
-		value: number;
-		zScore: number | null;
-		percentile: number | null;
-		classification: string | null;
-		lmsL: number | null;
-		lmsM: number | null;
-		lmsS: number | null;
-	}>
+  id: string,
+  patch: Partial<{
+    value: number;
+    zScore: number | null;
+    percentile: number | null;
+    classification: string | null;
+    lmsL: number | null;
+    lmsM: number | null;
+    lmsS: number | null;
+  }>,
 ) {
-	const [row] = await db
-		.update(measurements)
-		.set(patch)
-		.where(eq(measurements.id, id))
-		.returning();
-	return row;
+  const rows = await db
+    .update(measurements)
+    .set(patch)
+    .where(eq(measurements.id, id))
+    .returning();
+
+  return rows.at(0);
 }
 
 export async function deleteMeasurement(id: string) {
-	await db.delete(measurements).where(eq(measurements.id, id));
+  await db.delete(measurements).where(eq(measurements.id, id));
 }
 
 // ---------------------------------------------------------------------------
@@ -535,17 +599,15 @@ export async function deleteMeasurement(id: string) {
 /** Whatever `db.select().from(lmsReferences)` returns. */
 type LmsRefRow = typeof lmsReferences.$inferSelect;
 
-function toLmsRow(row: LmsRefRow): LmsRow {
-	return {
-		indicator: row.indicator as Indicator,
-		sex: row.sex as Sex,
-		xAxis: row.xAxis as XAxis,
-		xValue: row.xValue,
-		l: row.l,
-		m: row.m,
-		s: row.s
-	};
-}
+const toLmsRow = (row: LmsRefRow): LmsRow => ({
+  indicator: row.indicator,
+  sex: row.sex,
+  xAxis: row.xAxis,
+  xValue: row.xValue,
+  l: row.l,
+  m: row.m,
+  s: row.s,
+});
 
 // ---------------------------------------------------------------------------
 // Seed
@@ -560,31 +622,32 @@ function toLmsRow(row: LmsRefRow): LmsRow {
  * the table half-populated.
  */
 export async function seedLmsReferences(
-	seed: readonly LmsRow[]
+  seed: ReadonlyArray<LmsRow>,
 ): Promise<void> {
-	const COLS_PER_ROW = 9;
-	const MAX_PARAMS = 900;
-	const CHUNK = Math.floor(MAX_PARAMS / COLS_PER_ROW);
+  const COLS_PER_ROW = 9;
+  const MAX_PARAMS = 900;
+  const CHUNK = Math.floor(MAX_PARAMS / COLS_PER_ROW);
 
-	const values = seed.map(r => ({
-		indicator: r.indicator,
-		sex: r.sex,
-		xAxis: r.xAxis,
-		xValue: r.xValue,
-		l: r.l,
-		m: r.m,
-		s: r.s,
-		version: LMS_VERSION
-	}));
+  const values = seed.map((r) => ({
+    indicator: r.indicator,
+    sex: r.sex,
+    xAxis: r.xAxis,
+    xValue: r.xValue,
+    l: r.l,
+    m: r.m,
+    s: r.s,
+    version: LMS_VERSION,
+  }));
 
-	await db.transaction(async tx => {
-		for (let i = 0; i < values.length; i += CHUNK) {
-			await tx
-				.insert(lmsReferences)
-				.values(values.slice(i, i + CHUNK))
-				.onConflictDoNothing();
-		}
-	});
+  await db.transaction(async (tx) => {
+    for (let i = 0; i < values.length; i += CHUNK) {
+      // oxlint-disable-next-line eslint/no-await-in-loop -- sequential chunked insert within single transaction
+      await tx
+        .insert(lmsReferences)
+        .values(values.slice(i, i + CHUNK))
+        .onConflictDoNothing();
+    }
+  });
 }
 
 /**
@@ -592,10 +655,10 @@ export async function seedLmsReferences(
  * (Other versions are preserved.)
  */
 export async function replaceLmsReferences(
-	seed: readonly LmsRow[]
+  seed: ReadonlyArray<LmsRow>,
 ): Promise<void> {
-	await db.delete(lmsReferences).where(eq(lmsReferences.version, LMS_VERSION));
-	await seedLmsReferences(seed);
+  await db.delete(lmsReferences).where(eq(lmsReferences.version, LMS_VERSION));
+  await seedLmsReferences(seed);
 }
 
 // ---------------------------------------------------------------------------
@@ -607,26 +670,28 @@ export async function replaceLmsReferences(
  * tuple isn't tabulated. Use `getLmsInterpolated` for off-grid x.
  */
 export async function getLms(params: {
-	indicator: Indicator;
-	sex: Sex;
-	xAxis: XAxis;
-	xValue: number;
+  indicator: Indicator;
+  sex: Sex;
+  xAxis: XAxis;
+  xValue: number;
 }): Promise<LmsRow | null> {
-	const [row] = await db
-		.select()
-		.from(lmsReferences)
-		.where(
-			and(
-				eq(lmsReferences.indicator, params.indicator),
-				eq(lmsReferences.sex, params.sex),
-				eq(lmsReferences.xAxis, params.xAxis),
-				eq(lmsReferences.xValue, params.xValue),
-				eq(lmsReferences.version, LMS_VERSION)
-			)
-		)
-		.limit(1);
+  const rows = await db
+    .select()
+    .from(lmsReferences)
+    .where(
+      and(
+        eq(lmsReferences.indicator, params.indicator),
+        eq(lmsReferences.sex, params.sex),
+        eq(lmsReferences.xAxis, params.xAxis),
+        eq(lmsReferences.xValue, params.xValue),
+        eq(lmsReferences.version, LMS_VERSION),
+      ),
+    )
+    .limit(1);
 
-	return row ? toLmsRow(row) : null;
+  const row = rows.at(0);
+
+  return row === undefined ? null : toLmsRow(row);
 }
 
 // ---------------------------------------------------------------------------
@@ -640,56 +705,61 @@ export async function getLms(params: {
  * function never extrapolates from the nearest row.
  */
 export async function getLmsInterpolated(params: {
-	indicator: Indicator;
-	sex: Sex;
-	xAxis: XAxis;
-	xValue: number;
+  indicator: Indicator;
+  sex: Sex;
+  xAxis: XAxis;
+  xValue: number;
 }): Promise<LmsRow | null> {
-	const { indicator, sex, xAxis, xValue } = params;
+  const { indicator, sex, xAxis, xValue } = params;
 
-	const baseWhere = and(
-		eq(lmsReferences.indicator, indicator),
-		eq(lmsReferences.sex, sex),
-		eq(lmsReferences.xAxis, xAxis),
-		eq(lmsReferences.version, LMS_VERSION)
-	);
+  const baseWhere = and(
+    eq(lmsReferences.indicator, indicator),
+    eq(lmsReferences.sex, sex),
+    eq(lmsReferences.xAxis, xAxis),
+    eq(lmsReferences.version, LMS_VERSION),
+  );
 
-	const [belowRows, aboveRows] = await Promise.all([
-		db
-			.select()
-			.from(lmsReferences)
-			.where(and(baseWhere, lte(lmsReferences.xValue, xValue)))
-			.orderBy(desc(lmsReferences.xValue))
-			.limit(1),
-		db
-			.select()
-			.from(lmsReferences)
-			.where(and(baseWhere, gte(lmsReferences.xValue, xValue)))
-			.orderBy(asc(lmsReferences.xValue))
-			.limit(1)
-	]);
+  const [belowRows, aboveRows] = await Promise.all([
+    db
+      .select()
+      .from(lmsReferences)
+      .where(and(baseWhere, lte(lmsReferences.xValue, xValue)))
+      .orderBy(desc(lmsReferences.xValue))
+      .limit(1),
+    db
+      .select()
+      .from(lmsReferences)
+      .where(and(baseWhere, gte(lmsReferences.xValue, xValue)))
+      .orderBy(asc(lmsReferences.xValue))
+      .limit(1),
+  ]);
 
-	const below = belowRows[0];
-	const above = aboveRows[0];
+  const below = belowRows.at(0);
+  const above = aboveRows.at(0);
 
-	if (!below || !above) return null;
-	if (below.xValue === above.xValue) return toLmsRow(below);
+  if (below === undefined || above === undefined) {
+    return null;
+  }
 
-	const tri = interpolateLms(
-		xValue,
-		{ x: below.xValue, l: below.l, m: below.m, s: below.s },
-		{ x: above.xValue, l: above.l, m: above.m, s: above.s }
-	);
+  if (below.xValue === above.xValue) {
+    return toLmsRow(below);
+  }
 
-	return {
-		indicator,
-		sex,
-		xAxis,
-		xValue,
-		l: tri.l,
-		m: tri.m,
-		s: tri.s
-	};
+  const tri = interpolateLms(
+    xValue,
+    { x: below.xValue, l: below.l, m: below.m, s: below.s },
+    { x: above.xValue, l: above.l, m: above.m, s: above.s },
+  );
+
+  return {
+    indicator,
+    sex,
+    xAxis,
+    xValue,
+    l: tri.l,
+    m: tri.m,
+    s: tri.s,
+  };
 }
 
 // ---------------------------------------------------------------------------

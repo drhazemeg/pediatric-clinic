@@ -1,13 +1,13 @@
 // apps/web/pwa-assets.config.ts
 import {
-	defineConfig,
-	minimal2023Preset as preset
-} from "@vite-pwa/assets-generator/config";
+  defineConfig,
+  minimal2023Preset as preset,
+} from '@vite-pwa/assets-generator/config';
 
 export default defineConfig({
-	headLinkOptions: {
-		preset: "2023"
-	},
-	preset,
-	images: ["public/clinic-logo-200.webp"]
+  headLinkOptions: {
+    preset: '2023',
+  },
+  preset,
+  images: ['public/clinic-logo-200.webp'],
 });

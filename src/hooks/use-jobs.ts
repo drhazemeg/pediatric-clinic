@@ -1,23 +1,58 @@
 // apps/web/src/hooks/use-jobs.ts
 
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
-import {
-	jobActions,
-	useJobsStore
-} from "@/integrations/tanstack-store/job-store";
-import { authClient } from "@/lib/auth-client";
-import { cancelJobFn, listJobsFn } from "@/server/functions/jobs.functions";
-import { useJobPolling } from "./use-job-polling";
-import {
-	ACTIVE_STATUSES,
-	type CompletedResult,
-	isTerminal,
-	type JobKind,
-	MAX_PARALLEL
-} from "./use-job-shared";
+import type {
+  CompletedResult,
+  JobKind,
+  JobTransportEvent,
+} from './use-job-shared';
 
-export type { ActiveJob, CompletedResult } from "./use-job-shared";
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
+import { z } from 'zod';
+
+import {
+  jobActions,
+  useJobsStore,
+} from '@/integrations/tanstack-store/job-store';
+import { authClient } from '@/lib/auth-client';
+import { cancelJobFn, listJobsFn } from '@/server/functions/jobs.functions';
+
+import { useJobPolling } from './use-job-polling';
+import {
+  ACTIVE_STATUSES,
+  MAX_PARALLEL,
+  isTerminal,
+  jobJsonRecordSchema,
+} from './use-job-shared';
+
+export type { ActiveJob, CompletedResult } from './use-job-shared';
+
+const jobKindSchema = z.enum([
+  'growth_recalc',
+  'immunization_sweep',
+  'ledger_report',
+  'certificate_pdf',
+  'ai_soap_draft',
+  'ai_patient_education',
+  'ai_differential_dx',
+  'ai_dosing_safety',
+  'ai_growth_interpretation',
+  'ai_immunization_advice',
+  'ai_follow_up_questions',
+]);
+
+const completedStatusSchema = z.enum([
+  'completed',
+  'completed_partial',
+  'failed',
+  'cancelled',
+]);
+
+const jobUpdatePayloadSchema = z.object({
+  kind: jobKindSchema.optional(),
+  resultJson: jobJsonRecordSchema.nullable().optional(),
+  errorMessage: z.string().nullable().optional(),
+});
 
 /**
  * Central hook for background jobs (AI tasks + non-AI tasks like
@@ -25,143 +60,183 @@ export type { ActiveJob, CompletedResult } from "./use-job-shared";
  * any per-patient job widget.
  */
 export function useJobs() {
-	const { data: session, isPending: isSessionPending } =
-		authClient.useSession();
-	const isAuthenticated = Boolean(session?.user?.id) && !isSessionPending;
+  const { data: session, isPending: isSessionPending } =
+    authClient.useSession();
 
-	// --- store subscriptions ---
-	const jobIds = useJobsStore(s => s.jobIds);
-	const completedResults = useJobsStore(s => s.completedResults);
-	const error = useJobsStore(s => s.error);
-	const processedStates = useJobsStore(s => s.processedStates);
-	const removedIds = useJobsStore(s => s.removedIds);
+  const isAuthenticated =
+    session?.user.id !== undefined &&
+    session.user.id !== '' &&
+    !isSessionPending;
 
-	// --- store actions (stable references from the module-level store) ---
-	const addJob = jobActions.addJob;
-	const removeJobStore = jobActions.removeJob;
-	const resetAll = jobActions.resetAll;
-	const setError = jobActions.setError;
-	const trackStatus = jobActions.trackStatus;
-	const setResult = jobActions.setResult;
-	const clearResult = jobActions.clearResult;
-	const dismissResult = jobActions.dismissResult;
+  // --- store subscriptions ---
+  const jobIds = useJobsStore((s) => s.jobIds);
+  const completedResults = useJobsStore((s) => s.completedResults);
+  const error = useJobsStore((s) => s.error);
+  const processedStates = useJobsStore((s) => s.processedStates);
+  const removedIds = useJobsStore((s) => s.removedIds);
 
-	// --- fallback discovery — catches jobs started elsewhere ---
-	const myJobsQuery = useQuery({
-		queryKey: ["jobs", "list", { limit: 20, offset: 0 }] as const,
-		queryFn: () => listJobsFn({ data: { limit: 20, offset: 0 } }),
-		enabled: isAuthenticated,
-		refetchInterval: 5000,
-		staleTime: 0,
-		gcTime: 5 * 60_000
-	});
+  // --- store actions (stable references from the module-level store) ---
+  const { addJob } = jobActions;
+  const removeJobStore = jobActions.removeJob;
+  const { resetAll } = jobActions;
+  const { setError } = jobActions;
+  const { trackStatus } = jobActions;
+  const { setResult } = jobActions;
+  const { clearResult } = jobActions;
+  const { dismissResult } = jobActions;
 
-	// --- polling transport ---
-	const { subscribe, unsubscribe, onUpdate, activeJobs } = useJobPolling({
-		isAuthenticated
-	});
+  // --- fallback discovery — catches jobs started elsewhere ---
+  const myJobsQuery = useQuery({
+    queryKey: ['jobs', 'list', { limit: 20, offset: 0 }] as const,
+    queryFn: async () => await listJobsFn({ data: { limit: 20, offset: 0 } }),
+    enabled: isAuthenticated,
+    refetchInterval: 5000,
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+  });
 
-	useEffect(() => {
-		subscribe(jobIds);
-		return () => unsubscribe();
-	}, [jobIds, subscribe, unsubscribe]);
+  // --- polling transport ---
+  const { subscribe, unsubscribe, onUpdate, activeJobs } = useJobPolling({
+    isAuthenticated,
+  });
 
-	// --- live update handler ---
-	const onUpdateHandlerRef = useRef<
-		(event: {
-			jobId: string;
-			status: string;
-			data: Record<string, unknown>;
-		}) => void
-	>(() => {});
+  useEffect(() => {
+    subscribe(jobIds);
 
-	onUpdateHandlerRef.current = event => {
-		const { jobId, status, data } = event;
-		const kind = data.kind;
-		const prevStatus = processedStates[jobId];
-		if (prevStatus === status) return;
-		trackStatus(jobId, status);
+    return () => unsubscribe();
+  }, [jobIds, subscribe, unsubscribe]);
 
-		const baseResult: CompletedResult = {
-			jobId,
-			kind: kind as JobKind,
-			status: status as CompletedResult["status"],
-			result: (data.resultJson as Record<string, unknown> | null) ?? null,
-			errorMessage: (data.errorMessage as string) ?? null,
-			timestamp: Date.now()
-		};
+  // --- live update handler ---
+  const onUpdateHandlerRef = useRef<
+    ((event: JobTransportEvent) => void) | null
+  >(null);
 
-		if (status === "completed" || status === "completed_partial") {
-			setResult({
-				...baseResult,
-				errorMessage: baseResult.errorMessage ?? null
-			});
-			if (status === "completed_partial" && data.errorMessage) {
-				setError(data.errorMessage as string);
-			}
-		}
-		if (status === "failed") {
-			setError((data.errorMessage as string) ?? "Job failed");
-			clearResult(jobId);
-		}
-		if (status === "cancelled") {
-			clearResult(jobId);
-		}
-	};
+  useEffect(() => {
+    onUpdateHandlerRef.current = (event) => {
+      const { jobId, status, data } = event;
+      const prevStatus = processedStates[jobId];
 
-	useEffect(() => {
-		onUpdate(event => onUpdateHandlerRef.current(event));
-	}, [onUpdate]);
+      if (prevStatus === status) {
+        return;
+      }
 
-	// --- merge discovered jobs from the server fallback ---
-	useEffect(() => {
-		const items = myJobsQuery.data?.items;
-		if (!Array.isArray(items)) return;
-		for (const j of items as Array<{ id: string; status: string }>) {
-			if (
-				ACTIVE_STATUSES.has(j.status as never) &&
-				!removedIds.includes(j.id)
-			) {
-				if (!jobIds.includes(j.id)) addJob(j.id);
-			}
-		}
-	}, [myJobsQuery.data, removedIds, jobIds]);
-	// --- auto-remove terminal jobs after 5s ---
-	useEffect(() => {
-		const timers = jobIds
-			.filter(id => {
-				const ev = processedStates[id];
-				return ev && isTerminal(ev);
-			})
-			.map(id => setTimeout(() => removeJobStore(id), 5000));
-		return () => timers.forEach(clearTimeout);
-	}, [processedStates, jobIds]);
+      trackStatus(jobId, status);
 
-	// --- cancel + forget ---
-	const removeJob = (id: string) => {
-		cancelJobFn({ data: { id } }).catch(() => {});
-		removeJobStore(id);
-	};
+      const parsedData = jobUpdatePayloadSchema.safeParse(data);
 
-	const activeCount = activeJobs.length;
-	const canAddMore = activeCount < MAX_PARALLEL;
-	const isGenerating = activeCount > 0;
+      const kind: JobKind = parsedData.success
+        ? (parsedData.data.kind ?? 'ai_soap_draft')
+        : 'ai_soap_draft';
 
-	return {
-		jobIds,
-		activeJobs,
-		completedResults,
-		activeCount,
-		isGenerating,
-		canAddMore,
-		error,
-		addJob,
-		removeJob,
-		resetAll,
-		dismissResult,
-		setError,
-		myJobsQuery
-	};
+      const parsedStatus = completedStatusSchema.safeParse(status);
+
+      const resultStatus: CompletedResult['status'] = parsedStatus.success
+        ? parsedStatus.data
+        : 'completed';
+
+      const errorMessage = parsedData.success
+        ? (parsedData.data.errorMessage ?? null)
+        : null;
+
+      const baseResult: CompletedResult = {
+        jobId,
+        kind,
+        status: resultStatus,
+        result: parsedData.success
+          ? (parsedData.data.resultJson ?? null)
+          : null,
+        errorMessage,
+        timestamp: Date.now(),
+      };
+
+      if (status === 'completed' || status === 'completed_partial') {
+        setResult({ ...baseResult, errorMessage });
+
+        if (
+          status === 'completed_partial' &&
+          errorMessage !== null &&
+          errorMessage !== ''
+        ) {
+          setError(errorMessage);
+        }
+      }
+
+      if (status === 'failed') {
+        setError(errorMessage ?? 'Job failed');
+        clearResult(jobId);
+      }
+
+      if (status === 'cancelled') {
+        clearResult(jobId);
+      }
+    };
+  });
+
+  useEffect(() => {
+    onUpdate((event) => onUpdateHandlerRef.current?.(event));
+  }, [onUpdate]);
+
+  // --- merge discovered jobs from the server fallback ---
+  useEffect(() => {
+    const items = myJobsQuery.data?.items;
+
+    if (items === undefined) {
+      return;
+    }
+
+    for (const j of items) {
+      if (
+        ACTIVE_STATUSES.has(j.status) &&
+        !removedIds.includes(j.id) &&
+        !jobIds.includes(j.id)
+      ) {
+        addJob(j.id);
+      }
+    }
+  }, [myJobsQuery.data, removedIds, jobIds, addJob]);
+
+  // --- auto-remove terminal jobs after 5s ---
+  useEffect(() => {
+    const timers = jobIds
+      .filter((id) => {
+        const ev = processedStates[id] ?? '';
+
+        return ev !== '' && isTerminal(ev);
+      })
+      .map((id) => setTimeout(() => removeJobStore(id), 5000));
+
+    return () => {
+      for (const timer of timers) {
+        clearTimeout(timer);
+      }
+    };
+  }, [processedStates, jobIds, removeJobStore]);
+
+  // --- cancel + forget ---
+  const removeJob = (id: string) => {
+    void cancelJobFn({ data: { id } }).catch(() => null);
+    removeJobStore(id);
+  };
+
+  const activeCount = activeJobs.length;
+  const canAddMore = activeCount < MAX_PARALLEL;
+  const isGenerating = activeCount > 0;
+
+  return {
+    jobIds,
+    activeJobs,
+    completedResults,
+    activeCount,
+    isGenerating,
+    canAddMore,
+    error,
+    addJob,
+    removeJob,
+    resetAll,
+    dismissResult,
+    setError,
+    myJobsQuery,
+  };
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -169,19 +244,23 @@ export function useJobs() {
  * ────────────────────────────────────────────────────────────── */
 
 export function useAiJobs() {
-	const all = useJobs();
-	const aiActive = all.activeJobs.filter(j => j.kind.startsWith("ai_"));
-	const aiResults = Object.values(all.completedResults).filter(r =>
-		String(r.kind).startsWith("ai_")
-	);
-	return { ...all, activeJobs: aiActive, completedResults: aiResults };
+  const all = useJobs();
+  const aiActive = all.activeJobs.filter((j) => j.kind.startsWith('ai_'));
+
+  const aiResults = Object.values(all.completedResults).filter((r) =>
+    r.kind.startsWith('ai_'),
+  );
+
+  return { ...all, activeJobs: aiActive, completedResults: aiResults };
 }
 
 export function useBackgroundJobs() {
-	const all = useJobs();
-	const bgActive = all.activeJobs.filter(j => !j.kind.startsWith("ai_"));
-	const bgResults = Object.values(all.completedResults).filter(
-		r => !r.kind.startsWith("ai_")
-	);
-	return { ...all, activeJobs: bgActive, completedResults: bgResults };
+  const all = useJobs();
+  const bgActive = all.activeJobs.filter((j) => !j.kind.startsWith('ai_'));
+
+  const bgResults = Object.values(all.completedResults).filter(
+    (r) => !r.kind.startsWith('ai_'),
+  );
+
+  return { ...all, activeJobs: bgActive, completedResults: bgResults };
 }

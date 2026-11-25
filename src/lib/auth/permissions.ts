@@ -1,11 +1,11 @@
-import { createAccessControl } from "better-auth/plugins/access";
+import { createAccessControl } from 'better-auth/plugins/access';
 import {
-	adminAc,
-	defaultStatements,
-	userAc
-} from "better-auth/plugins/admin/access";
+  adminAc,
+  defaultStatements,
+  userAc,
+} from 'better-auth/plugins/admin/access';
 
-import { ROLES_MAP } from "./role";
+import { ROLES_MAP } from './role';
 
 // Packages/auth/src/permissions.ts (adjust path to match your repo)
 
@@ -25,153 +25,153 @@ import { ROLES_MAP } from "./role";
 // Supposed to prevent.
 
 export const statements = {
-	...defaultStatements,
+  ...defaultStatements,
 
-	// ----------------------------------------------------------
-	// Admissions & beds
-	// ----------------------------------------------------------
-	admission: [
-		"create",
-		"read",
-		"update",
-		"delete",
-		"discharge",
-		"transfer"
-	] as const,
+  // ----------------------------------------------------------
+  // Admissions & beds
+  // ----------------------------------------------------------
+  admission: [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'discharge',
+    'transfer',
+  ] as const,
 
-	appointment: [
-		"create",
-		"read",
-		"update",
-		"delete",
-		"cancel",
-		"check-in",
-		"reschedule"
-	] as const,
+  appointment: [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'cancel',
+    'check-in',
+    'reschedule',
+  ] as const,
 
-	// ----------------------------------------------------------
-	// Auditing & reporting
-	// ----------------------------------------------------------
-	auditLog: ["read", "export"] as const,
+  // ----------------------------------------------------------
+  // Auditing & reporting
+  // ----------------------------------------------------------
+  auditLog: ['read', 'export'] as const,
 
-	bed: ["create", "read", "update", "delete", "allocate", "release"] as const,
+  bed: ['create', 'read', 'update', 'delete', 'allocate', 'release'] as const,
 
-	chargeCatalog: ["create", "read", "update", "delete"] as const,
+  chargeCatalog: ['create', 'read', 'update', 'delete'] as const,
 
-	clinicalNote: ["create", "read", "update", "delete"] as const,
+  clinicalNote: ['create', 'read', 'update', 'delete'] as const,
 
-	clinicSettings: ["read", "update"] as const,
+  clinicSettings: ['read', 'update'] as const,
 
-	dashboard: ["read"] as const,
+  dashboard: ['read'] as const,
 
-	department: ["create", "read", "update", "delete"] as const,
+  department: ['create', 'read', 'update', 'delete'] as const,
 
-	diagnosis: ["create", "read", "update", "delete"] as const,
+  diagnosis: ['create', 'read', 'update', 'delete'] as const,
 
-	doctor: ["create", "read", "update", "delete"] as const,
+  doctor: ['create', 'read', 'update', 'delete'] as const,
 
-	document: ["create", "read", "update", "delete"] as const,
+  document: ['create', 'read', 'update', 'delete'] as const,
 
-	encounter: [
-		"create",
-		"read",
-		"update",
-		"delete",
-		"complete",
-		"cancel"
-	] as const,
+  encounter: [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'complete',
+    'cancel',
+  ] as const,
 
-	expense: ["create", "read", "update", "delete"] as const,
+  expense: ['create', 'read', 'update', 'delete'] as const,
 
-	growth: ["create", "read", "update", "delete"] as const,
+  growth: ['create', 'read', 'update', 'delete'] as const,
 
-	guardian: ["create", "read", "update", "delete"] as const,
+  guardian: ['create', 'read', 'update', 'delete'] as const,
 
-	immunization: [
-		"create",
-		"read",
-		"update",
-		"delete",
-		"administer",
-		"defer",
-		"refuse"
-	] as const,
+  immunization: [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'administer',
+    'defer',
+    'refuse',
+  ] as const,
 
-	inventory: ["read", "adjust", "receive", "dispense"] as const,
+  inventory: ['read', 'adjust', 'receive', 'dispense'] as const,
 
-	// ----------------------------------------------------------
-	// Billing
-	// ----------------------------------------------------------
-	invoice: [
-		"create",
-		"read",
-		"update",
-		"delete",
-		"issue",
-		"void",
-		"refund"
-	] as const,
+  // ----------------------------------------------------------
+  // Billing
+  // ----------------------------------------------------------
+  invoice: [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'issue',
+    'void',
+    'refund',
+  ] as const,
 
-	// ----------------------------------------------------------
-	// Labs
-	// ----------------------------------------------------------
-	labOrder: [
-		"create",
-		"read",
-		"update",
-		"delete",
-		"collect",
-		"result",
-		"cancel"
-	] as const,
+  // ----------------------------------------------------------
+  // Labs
+  // ----------------------------------------------------------
+  labOrder: [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'collect',
+    'result',
+    'cancel',
+  ] as const,
 
-	labTest: ["create", "read", "update", "delete"] as const,
+  labTest: ['create', 'read', 'update', 'delete'] as const,
 
-	// ----------------------------------------------------------
-	// Records & documents
-	// ----------------------------------------------------------
-	medicalRecord: ["create", "read", "update", "delete"] as const,
+  // ----------------------------------------------------------
+  // Records & documents
+  // ----------------------------------------------------------
+  medicalRecord: ['create', 'read', 'update', 'delete'] as const,
 
-	medicine: ["create", "read", "update", "delete"] as const,
+  medicine: ['create', 'read', 'update', 'delete'] as const,
 
-	// ----------------------------------------------------------
-	// Clinical
-	// ----------------------------------------------------------
-	patient: [
-		"create",
-		"read",
-		"update",
-		"delete",
-		"archive",
-		"merge",
-		"export"
-	] as const,
+  // ----------------------------------------------------------
+  // Clinical
+  // ----------------------------------------------------------
+  patient: [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'archive',
+    'merge',
+    'export',
+  ] as const,
 
-	payment: ["create", "read", "update", "delete", "refund"] as const,
+  payment: ['create', 'read', 'update', 'delete', 'refund'] as const,
 
-	// ----------------------------------------------------------
-	// Prescriptions & pharmacy
-	// ----------------------------------------------------------
-	prescription: [
-		"create",
-		"read",
-		"update",
-		"delete",
-		"fill",
-		"discontinue",
-		"renew"
-	] as const,
+  // ----------------------------------------------------------
+  // Prescriptions & pharmacy
+  // ----------------------------------------------------------
+  prescription: [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'fill',
+    'discontinue',
+    'renew',
+  ] as const,
 
-	report: ["read", "export"] as const,
+  report: ['read', 'export'] as const,
 
-	schedule: ["create", "read", "update", "delete"] as const,
+  schedule: ['create', 'read', 'update', 'delete'] as const,
 
-	// ----------------------------------------------------------
-	// Staff & org
-	// ----------------------------------------------------------
-	staff: ["create", "read", "update", "delete", "deactivate"] as const,
+  // ----------------------------------------------------------
+  // Staff & org
+  // ----------------------------------------------------------
+  staff: ['create', 'read', 'update', 'delete', 'deactivate'] as const,
 
-	vital: ["create", "read", "update", "delete"] as const
+  vital: ['create', 'read', 'update', 'delete'] as const,
 } as const;
 
 export const ac = createAccessControl(statements);
@@ -189,281 +189,281 @@ export const ac = createAccessControl(statements);
 //               Layer; this map only grants the *actions*)
 
 export const roles = {
-	// ----------------------------------------------------------
-	// Admin — full control
-	// ----------------------------------------------------------
-	[ROLES_MAP.ADMIN]: ac.newRole({
-		...adminAc.statements,
+  // ----------------------------------------------------------
+  // Admin — full control
+  // ----------------------------------------------------------
+  [ROLES_MAP.ADMIN]: ac.newRole({
+    ...adminAc.statements,
 
-		admission: ["create", "read", "update", "delete", "discharge", "transfer"],
+    admission: ['create', 'read', 'update', 'delete', 'discharge', 'transfer'],
 
-		appointment: [
-			"create",
-			"read",
-			"update",
-			"delete",
-			"cancel",
-			"check-in",
-			"reschedule"
-		],
+    appointment: [
+      'create',
+      'read',
+      'update',
+      'delete',
+      'cancel',
+      'check-in',
+      'reschedule',
+    ],
 
-		auditLog: ["read", "export"],
+    auditLog: ['read', 'export'],
 
-		bed: ["create", "read", "update", "delete", "allocate", "release"],
+    bed: ['create', 'read', 'update', 'delete', 'allocate', 'release'],
 
-		chargeCatalog: ["create", "read", "update", "delete"],
+    chargeCatalog: ['create', 'read', 'update', 'delete'],
 
-		clinicSettings: ["read", "update"],
+    clinicSettings: ['read', 'update'],
 
-		clinicalNote: ["create", "read", "update", "delete"],
+    clinicalNote: ['create', 'read', 'update', 'delete'],
 
-		dashboard: ["read"],
+    dashboard: ['read'],
 
-		department: ["create", "read", "update", "delete"],
+    department: ['create', 'read', 'update', 'delete'],
 
-		diagnosis: ["create", "read", "update", "delete"],
+    diagnosis: ['create', 'read', 'update', 'delete'],
 
-		doctor: ["create", "read", "update", "delete"],
+    doctor: ['create', 'read', 'update', 'delete'],
 
-		document: ["create", "read", "update", "delete"],
+    document: ['create', 'read', 'update', 'delete'],
 
-		encounter: ["create", "read", "update", "delete", "complete", "cancel"],
+    encounter: ['create', 'read', 'update', 'delete', 'complete', 'cancel'],
 
-		expense: ["create", "read", "update", "delete"],
+    expense: ['create', 'read', 'update', 'delete'],
 
-		growth: ["create", "read", "update", "delete"],
+    growth: ['create', 'read', 'update', 'delete'],
 
-		guardian: ["create", "read", "update", "delete"],
+    guardian: ['create', 'read', 'update', 'delete'],
 
-		immunization: [
-			"create",
-			"read",
-			"update",
-			"delete",
-			"administer",
-			"defer",
-			"refuse"
-		],
+    immunization: [
+      'create',
+      'read',
+      'update',
+      'delete',
+      'administer',
+      'defer',
+      'refuse',
+    ],
 
-		inventory: ["read", "adjust", "receive", "dispense"],
+    inventory: ['read', 'adjust', 'receive', 'dispense'],
 
-		invoice: ["create", "read", "update", "delete", "issue", "void", "refund"],
+    invoice: ['create', 'read', 'update', 'delete', 'issue', 'void', 'refund'],
 
-		labOrder: [
-			"create",
-			"read",
-			"update",
-			"delete",
-			"collect",
-			"result",
-			"cancel"
-		],
+    labOrder: [
+      'create',
+      'read',
+      'update',
+      'delete',
+      'collect',
+      'result',
+      'cancel',
+    ],
 
-		labTest: ["create", "read", "update", "delete"],
+    labTest: ['create', 'read', 'update', 'delete'],
 
-		medicalRecord: ["create", "read", "update", "delete"],
+    medicalRecord: ['create', 'read', 'update', 'delete'],
 
-		medicine: ["create", "read", "update", "delete"],
+    medicine: ['create', 'read', 'update', 'delete'],
 
-		patient: [
-			"create",
-			"read",
-			"update",
-			"delete",
-			"archive",
-			"merge",
-			"export"
-		],
+    patient: [
+      'create',
+      'read',
+      'update',
+      'delete',
+      'archive',
+      'merge',
+      'export',
+    ],
 
-		payment: ["create", "read", "update", "delete", "refund"],
+    payment: ['create', 'read', 'update', 'delete', 'refund'],
 
-		prescription: [
-			"create",
-			"read",
-			"update",
-			"delete",
-			"fill",
-			"discontinue",
-			"renew"
-		],
+    prescription: [
+      'create',
+      'read',
+      'update',
+      'delete',
+      'fill',
+      'discontinue',
+      'renew',
+    ],
 
-		report: ["read", "export"],
+    report: ['read', 'export'],
 
-		schedule: ["create", "read", "update", "delete"],
+    schedule: ['create', 'read', 'update', 'delete'],
 
-		staff: ["create", "read", "update", "delete", "deactivate"],
+    staff: ['create', 'read', 'update', 'delete', 'deactivate'],
 
-		vital: ["create", "read", "update", "delete"]
-	}),
+    vital: ['create', 'read', 'update', 'delete'],
+  }),
 
-	// ----------------------------------------------------------
-	// Doctor — full clinical, read-only billing
-	// ----------------------------------------------------------
-	[ROLES_MAP.DOCTOR]: ac.newRole({
-		...userAc.statements,
+  // ----------------------------------------------------------
+  // Doctor — full clinical, read-only billing
+  // ----------------------------------------------------------
+  [ROLES_MAP.DOCTOR]: ac.newRole({
+    ...userAc.statements,
 
-		admission: ["create", "read", "update", "discharge", "transfer"],
+    admission: ['create', 'read', 'update', 'discharge', 'transfer'],
 
-		appointment: [
-			"create",
-			"read",
-			"update",
-			"cancel",
-			"check-in",
-			"reschedule"
-		],
+    appointment: [
+      'create',
+      'read',
+      'update',
+      'cancel',
+      'check-in',
+      'reschedule',
+    ],
 
-		bed: ["read", "allocate", "release"],
+    bed: ['read', 'allocate', 'release'],
 
-		chargeCatalog: ["read"],
+    chargeCatalog: ['read'],
 
-		clinicSettings: ["read"],
+    clinicSettings: ['read'],
 
-		clinicalNote: ["create", "read", "update"],
+    clinicalNote: ['create', 'read', 'update'],
 
-		dashboard: ["read"],
+    dashboard: ['read'],
 
-		department: ["read"],
+    department: ['read'],
 
-		diagnosis: ["create", "read", "update", "delete"],
+    diagnosis: ['create', 'read', 'update', 'delete'],
 
-		doctor: ["read"],
+    doctor: ['read'],
 
-		document: ["create", "read", "update"],
+    document: ['create', 'read', 'update'],
 
-		encounter: ["create", "read", "update", "complete", "cancel"],
+    encounter: ['create', 'read', 'update', 'complete', 'cancel'],
 
-		growth: ["create", "read", "update"],
+    growth: ['create', 'read', 'update'],
 
-		guardian: ["create", "read", "update"],
+    guardian: ['create', 'read', 'update'],
 
-		immunization: ["create", "read", "update", "administer", "defer", "refuse"],
+    immunization: ['create', 'read', 'update', 'administer', 'defer', 'refuse'],
 
-		inventory: ["read"],
+    inventory: ['read'],
 
-		invoice: ["read"],
+    invoice: ['read'],
 
-		labOrder: ["create", "read", "update", "collect", "result", "cancel"],
+    labOrder: ['create', 'read', 'update', 'collect', 'result', 'cancel'],
 
-		labTest: ["read"],
+    labTest: ['read'],
 
-		medicalRecord: ["create", "read", "update"],
+    medicalRecord: ['create', 'read', 'update'],
 
-		medicine: ["read"],
+    medicine: ['read'],
 
-		patient: ["create", "read", "update", "archive", "export"],
+    patient: ['create', 'read', 'update', 'archive', 'export'],
 
-		payment: ["read"],
+    payment: ['read'],
 
-		prescription: ["create", "read", "update", "fill", "discontinue", "renew"],
+    prescription: ['create', 'read', 'update', 'fill', 'discontinue', 'renew'],
 
-		report: ["read", "export"],
+    report: ['read', 'export'],
 
-		schedule: ["read", "update"],
+    schedule: ['read', 'update'],
 
-		staff: ["read"],
+    staff: ['read'],
 
-		vital: ["create", "read", "update"]
-	}),
+    vital: ['create', 'read', 'update'],
+  }),
 
-	// ----------------------------------------------------------
-	// Staff — front desk / nursing: scheduling, vitals, dispensing,
-	// Billing. No clinical notes, no prescribing, no diagnoses.
-	// ----------------------------------------------------------
-	[ROLES_MAP.STAFF]: ac.newRole({
-		...userAc.statements,
+  // ----------------------------------------------------------
+  // Staff — front desk / nursing: scheduling, vitals, dispensing,
+  // Billing. No clinical notes, no prescribing, no diagnoses.
+  // ----------------------------------------------------------
+  [ROLES_MAP.STAFF]: ac.newRole({
+    ...userAc.statements,
 
-		admission: ["read", "create"],
+    admission: ['read', 'create'],
 
-		appointment: [
-			"create",
-			"read",
-			"update",
-			"cancel",
-			"check-in",
-			"reschedule"
-		],
-		bed: ["read", "allocate", "release"],
-		chargeCatalog: ["read"],
-		clinicSettings: ["read"],
+    appointment: [
+      'create',
+      'read',
+      'update',
+      'cancel',
+      'check-in',
+      'reschedule',
+    ],
+    bed: ['read', 'allocate', 'release'],
+    chargeCatalog: ['read'],
+    clinicSettings: ['read'],
 
-		dashboard: ["read"],
-		department: ["read"],
-		doctor: ["read"],
-		document: ["create", "read"],
-		encounter: ["read", "create"],
-		growth: ["create", "read", "update"],
-		guardian: ["create", "read", "update"],
-		immunization: ["read", "create", "administer", "defer", "refuse"],
-		inventory: ["read", "adjust", "receive", "dispense"],
+    dashboard: ['read'],
+    department: ['read'],
+    doctor: ['read'],
+    document: ['create', 'read'],
+    encounter: ['read', 'create'],
+    growth: ['create', 'read', 'update'],
+    guardian: ['create', 'read', 'update'],
+    immunization: ['read', 'create', 'administer', 'defer', 'refuse'],
+    inventory: ['read', 'adjust', 'receive', 'dispense'],
 
-		invoice: ["create", "read", "update", "issue"],
+    invoice: ['create', 'read', 'update', 'issue'],
 
-		labOrder: ["read", "create", "collect"],
-		labTest: ["read"],
+    labOrder: ['read', 'create', 'collect'],
+    labTest: ['read'],
 
-		medicalRecord: ["create", "read"],
-		medicine: ["read"],
+    medicalRecord: ['create', 'read'],
+    medicine: ['read'],
 
-		patient: ["create", "read", "update"],
-		payment: ["create", "read"],
+    patient: ['create', 'read', 'update'],
+    payment: ['create', 'read'],
 
-		prescription: ["read", "fill"],
-		schedule: ["read"],
+    prescription: ['read', 'fill'],
+    schedule: ['read'],
 
-		staff: ["read"],
-		vital: ["create", "read", "update"]
-	}),
+    staff: ['read'],
+    vital: ['create', 'read', 'update'],
+  }),
 
-	// ----------------------------------------------------------
-	// Patient — read-only access to their own data. Row-level scoping
-	// (e.g. "this patient may only read rows where patientId = self")
-	// Is enforced in the API layer; this map grants only the actions.
-	// ----------------------------------------------------------
-	[ROLES_MAP.GUARDIAN]: ac.newRole({
-		...userAc.statements,
+  // ----------------------------------------------------------
+  // Patient — read-only access to their own data. Row-level scoping
+  // (e.g. "this patient may only read rows where patientId = self")
+  // Is enforced in the API layer; this map grants only the actions.
+  // ----------------------------------------------------------
+  [ROLES_MAP.GUARDIAN]: ac.newRole({
+    ...userAc.statements,
 
-		appointment: ["read", "cancel", "reschedule"],
-		immunization: ["read"],
-		growth: ["read"],
-		encounter: ["read"],
-		prescription: ["read"],
-		document: ["read"]
-	}),
+    appointment: ['read', 'cancel', 'reschedule'],
+    immunization: ['read'],
+    growth: ['read'],
+    encounter: ['read'],
+    prescription: ['read'],
+    document: ['read'],
+  }),
 
-	[ROLES_MAP.PATIENT]: ac.newRole({
-		...userAc.statements,
+  [ROLES_MAP.PATIENT]: ac.newRole({
+    ...userAc.statements,
 
-		admission: ["read"],
+    admission: ['read'],
 
-		appointment: ["read", "cancel", "reschedule"],
-		bed: ["read"],
-		clinicSettings: ["read"],
+    appointment: ['read', 'cancel', 'reschedule'],
+    bed: ['read'],
+    clinicSettings: ['read'],
 
-		dashboard: ["read"],
-		department: ["read"],
-		diagnosis: ["read"],
+    dashboard: ['read'],
+    department: ['read'],
+    diagnosis: ['read'],
 
-		doctor: ["read"],
-		document: ["read"],
-		encounter: ["read"],
-		growth: ["read"],
-		guardian: ["read"],
-		immunization: ["read"],
+    doctor: ['read'],
+    document: ['read'],
+    encounter: ['read'],
+    growth: ['read'],
+    guardian: ['read'],
+    immunization: ['read'],
 
-		invoice: ["read"],
+    invoice: ['read'],
 
-		labOrder: ["read"],
-		labTest: ["read"],
+    labOrder: ['read'],
+    labTest: ['read'],
 
-		medicalRecord: ["read"],
-		medicine: ["read"],
+    medicalRecord: ['read'],
+    medicine: ['read'],
 
-		patient: ["read"],
-		payment: ["read"],
+    patient: ['read'],
+    payment: ['read'],
 
-		prescription: ["read"],
-		schedule: ["read"],
-		vital: ["read"]
-	})
+    prescription: ['read'],
+    schedule: ['read'],
+    vital: ['read'],
+  }),
 };
